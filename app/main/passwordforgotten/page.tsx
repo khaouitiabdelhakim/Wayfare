@@ -3,8 +3,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-// Import Firebase Auth functions
-import { auth } from "../../../configs/firebase.config";
 import { sendPasswordResetEmail } from "@firebase/auth";
 
 const PasswordForgottenPage = () => {
@@ -15,12 +13,6 @@ const PasswordForgottenPage = () => {
 
   const handlePasswordReset = async (e) => {
     e.preventDefault();
-    try {
-      await sendPasswordResetEmail(auth, email);
-      setSuccessMessage("Password reset email sent successfully.");
-    } catch (error) {
-      setError("Error sending password reset email. Please try again.");
-    }
   };
 
   return (
