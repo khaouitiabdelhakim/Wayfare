@@ -1,0 +1,27 @@
+useEffect(() => {
+    setLoading(true);
+    // Reference to 'participation' node in your Firebase Realtime Database
+    const participationRef = ref(database, "fintech/2024/teams");
+
+    // Listen for changes to the 'participation' node
+    onValue(participationRef, (snapshot) => {
+      const data = snapshot.val(); // Retrieve the data from the snapshot
+      if (data) {
+        // Convert the object of objects into an array of objects
+        const dataArray = Object.keys(data)
+          .map((key) => ({
+            id: key,
+            ...data[key],
+          }))
+        setTeamsData(dataArray); // Set the fetched data to state
+        setLoading(false);
+        console.log(dataArray);
+      }
+    });
+
+    // Cleanup function to remove the listener when component unmounts
+    return () => {
+      // Stop listening for changes when component unmounts
+      off(participationRef);
+    };
+  }, []); // Run this effect only once after component mounts
