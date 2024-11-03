@@ -35,7 +35,7 @@ const UserDashboard = () => {
             <Link href="/user/support" className="mx-2 flex-1">
               <div className="bg-orange-500 rounded-lg p-4 text-center text-white shadow-lg">
                 <h2 className="text-xl font-semibold">Support</h2>
-                <p>Obtenir de l'aide et des informations</p>
+                <p>Obtenir de l&apos;aide et des informations</p>
               </div>
             </Link>
           </div>

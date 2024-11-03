@@ -211,7 +211,7 @@ const SignupPage = () => {
                           />
                         </svg>
                       )}
-                      S'inscrire
+                      S&apos;inscrire
                     </button>
                   </div>
                   <p className="text-center text-base text-body-color dark:text-body-color-dark">

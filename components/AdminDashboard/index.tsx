@@ -23,13 +23,13 @@ const AdminDashboard = () => {
             <Link href="/admin/bus" className="mx-2 flex-1">
               <div className="rounded-lg bg-green-500 p-4 text-center text-white shadow-lg">
                 <h2 className="text-xl font-semibold">Bus</h2>
-                <p>Gérer l'ensemble des bus</p>
+                <p>Gérer l&apos;ensemble des bus</p>
               </div>
             </Link>
             <Link href="/admin/lines" className="mx-2 flex-1">
               <div className="bg-orange-500 rounded-lg p-4 text-center text-white shadow-lg">
                 <h2 className="text-xl font-semibold">Lignes</h2>
-                <p>Gérer l'ensemble des lignes</p>
+                <p>Gérer l&apos;ensemble des lignes</p>
               </div>
             </Link>
           </div>
