@@ -33,7 +33,7 @@ const PaymentComponent = () => {
 
       {/* User Information */}
       <div className="border rounded-lg p-4 mb-4">
-        <h3 className="font-semibold mb-2">Détails de l'utilisateur</h3>
+        <h3 className="font-semibold mb-2">Détails de l&apos;utilisateur</h3>
         <div className="mb-4">
           <label className="block mb-1" htmlFor="email">Email</label>
           <input
@@ -75,7 +75,7 @@ const PaymentComponent = () => {
         </div>
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block mb-1" htmlFor="expiryDate">Date d'expiration</label>
+            <label className="block mb-1" htmlFor="expiryDate">Date d&apos;expiration</label>
             <input
               type="text"
               id="expiryDate"
