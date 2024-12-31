@@ -30,10 +30,12 @@ export default function RootLayout({
         </Providers>
 
         <Analytics/>
+        <ChatAssistant/> 
       </body>
     </html>
   );
 }
 
 import { Providers } from "./providers";import { Metadata } from "next";
+import ChatAssistant from "@/components/ChatAssistant";
 

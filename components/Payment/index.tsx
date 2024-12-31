@@ -28,9 +28,6 @@ const PaymentComponent = () => {
         <p><strong>Heure:</strong> 08:00 AM</p>
       </div>
 
-
-      
-
       {/* User Information */}
       <div className="border rounded-lg p-4 mb-4">
         <h3 className="font-semibold mb-2">Détails de l&apos;utilisateur</h3>
