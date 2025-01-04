@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "types": ["leaflet", "react-leaflet"],
     "lib": [
       "dom",
       "dom.iterable",
