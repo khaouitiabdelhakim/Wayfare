@@ -2,40 +2,30 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signOut, getAuth } from "@firebase/auth";
-import { FaUserCircle, FaCog, FaSignOutAlt, FaBell } from "react-icons/fa";
-import { HiMenu } from "react-icons/hi";
+import { FaUserCircle, FaSignOutAlt, FaBell } from "react-icons/fa";
 
-const AdminHeader = () => {
+const UserHeader = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const router = useRouter();
 
   const notifications = [
-    { id: 1, text: "New user registered", time: "2 mins ago" },
-    { id: 2, text: "Server backup completed", time: "15 mins ago" },
-    { id: 3, text: "You have a new message", time: "1 hour ago" },
+    { id: 1, text: "Your subscription has been renewed", time: "2 hours ago" },
+    { id: 2, text: "Reservation confirmed for Jan 15", time: "1 day ago" },
   ];
 
   const handleSignOut = () => {
-    const auth = getAuth();
-    signOut(auth)
-      .then(() => {
-        console.log("User signed out");
-        router.push("/login");
-      })
-      .catch((error) => {
-        console.error("Sign out error:", error);
-      });
+    // Add sign-out logic here
+    console.log("User signed out");
+    router.push("/login");
   };
 
   return (
-    <header className="fixed top-0 left-0 z-10 bg-white shadow-md" style={{marginLeft:"240px", width:"calc(100% - 240px)"}}>
+    <header className="fixed top-0 left-0 z-10  bg-white shadow-md" style={{marginLeft:"240px", width:"calc(100% - 240px)"}}>
       <div className="container mx-auto flex items-center justify-between px-6 py-4">
-        {/* Admin Brand */}
+        {/* User Greeting */}
         <div className="flex items-center gap-3">
-          <HiMenu className="text-2xl text-gray-700 cursor-pointer lg:hidden" />
-          <h1 className="text-lg font-bold text-gray-700">Bonjour Admin</h1>
+          <h1 className="text-lg font-bold text-gray-700">Welcome, User!</h1>
         </div>
 
         {/* Current Date */}
@@ -104,10 +94,6 @@ const AdminHeader = () => {
                     <FaUserCircle className="mr-3" />
                     Profile
                   </li>
-                  <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                    <FaCog className="mr-3" />
-                    Settings
-                  </li>
                   <li
                     className="flex items-center px-4 py-2 text-red-500 hover:bg-gray-100 cursor-pointer"
                     onClick={handleSignOut}
@@ -125,4 +111,4 @@ const AdminHeader = () => {
   );
 };
 
-export default AdminHeader;
+export default UserHeader;

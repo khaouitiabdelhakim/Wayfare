@@ -21,10 +21,13 @@ export default function RootLayout({
           <Header />
           {children}
           <Footer />
+
+          <ChatAssistant />
         </Providers>
       </div>
   );
 }
 
 import { Providers } from "./providers";
+import ChatAssistant from "@/components/ChatAssistant";
 
