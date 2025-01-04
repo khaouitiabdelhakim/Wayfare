@@ -1,22 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
 * {
-  font-family: "DM Sans", sans-serif;
+  font-family: "Outfit", serif;
   font-optical-sizing: auto;
   font-style: normal;
 }
 
-a, button, textarea, input {
-  border-radius: 10px !important;;
+a,
+button,
+textarea,
+input {
+  border-radius: 10px !important;
 }
 
-.wow  {
-  border-radius: 10px !important;;
+.wow {
+  border-radius: 10px !important;
 }
 
 @layer base {
