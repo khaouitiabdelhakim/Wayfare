@@ -1,3 +1,5 @@
+'use client';
+
 import BusTracking from "@/components/BusTracking";
 import React from "react";
 
