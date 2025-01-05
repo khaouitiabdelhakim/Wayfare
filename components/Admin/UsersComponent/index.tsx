@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FaEdit, FaKey, FaTrash } from "react-icons/fa";
-
+import { FaEdit, FaKey, FaTrash, FaBell } from "react-icons/fa";
 import {
   FaUser,
   FaEnvelope,
@@ -10,7 +9,7 @@ import {
   FaMapMarkerAlt,
   FaUserShield,
   FaUserClock,
-} from "react-icons/fa"; 
+} from "react-icons/fa";
 
 enum Role {
   ADMIN = "Admin",
@@ -25,6 +24,34 @@ interface User {
   phoneNumber: string;
   address: string;
   role: Role;
+}
+
+class NotificationType {
+  id: number;
+  name: string;
+
+  constructor(id: number, name: string) {
+    this.id = id;
+    this.name = name;
+  }
+}
+
+class Notification {
+  id: number;
+  senderId: number;
+  receiverId: number;
+  type: NotificationType;
+  message: string;
+  status: boolean;
+
+  constructor(id: number, senderId: number, receiverId: number, type: NotificationType, message: string, status: boolean) {
+    this.id = id;
+    this.senderId = senderId;
+    this.receiverId = receiverId;
+    this.type = type;
+    this.message = message;
+    this.status = status;
+  }
 }
 
 const UserList = () => {
@@ -51,7 +78,9 @@ const UserList = () => {
 
   const [showPopup, setShowPopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
+  const [showNotificationPopup, setShowNotificationPopup] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [notificationMessage, setNotificationMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredUsers = users.filter(
@@ -78,6 +107,28 @@ const UserList = () => {
       );
       setShowEditPopup(false);
       setSelectedUser(null);
+    }
+  };
+
+  const handleSendNotification = (user: User) => {
+    setSelectedUser(user);
+    setShowNotificationPopup(true);
+  };
+
+  const handleNotificationSend = () => {
+    if (selectedUser && notificationMessage) {
+      // Here you would typically send the notification to the backend
+      const newNotification = new Notification(
+        1, // id
+        1, // senderId (admin)
+        selectedUser.id, // receiverId
+        new NotificationType(1, "Info"), // type
+        notificationMessage, // message
+        false // status
+      );
+      console.log("Notification sent:", newNotification);
+      setShowNotificationPopup(false);
+      setNotificationMessage("");
     }
   };
 
@@ -164,6 +215,12 @@ const UserList = () => {
                 }
               >
                 <FaKey /> Réinitialiser le mot de passe
+              </button>
+              <button
+                className="flex items-center gap-2 rounded bg-green-500 px-4 py-2 text-white shadow hover:bg-green-600"
+                onClick={() => handleSendNotification(user)}
+              >
+                <FaBell /> Send Notification
               </button>
             </div>
           </li>
@@ -320,6 +377,42 @@ const UserList = () => {
                   onClick={handleSaveEdit}
                 >
                   Enregistrer
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showNotificationPopup && selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+            <h3 className="mb-4 text-lg font-bold text-orange-800">
+              Envoyer une notification à {selectedUser.firstName} {selectedUser.lastName}
+            </h3>
+            <form>
+              <div className="mb-4">
+                <label className="mb-1 block text-sm font-medium">Message</label>
+                <textarea
+                  className="w-full rounded-lg border p-2"
+                  value={notificationMessage}
+                  onChange={(e) => setNotificationMessage(e.target.value)}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  className="rounded bg-gray-200 px-4 py-2 shadow hover:bg-gray-300"
+                  onClick={() => setShowNotificationPopup(false)}
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  className="rounded bg-green-500 px-4 py-2 text-white shadow hover:bg-green-600"
+                  onClick={handleNotificationSend}
+                >
+                  Envoyer
                 </button>
               </div>
             </form>

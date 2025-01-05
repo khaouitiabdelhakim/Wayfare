@@ -6,6 +6,7 @@ import AirlineStopsRoundedIcon from '@mui/icons-material/AirlineStopsRounded';
 import RouteRoundedIcon from '@mui/icons-material/RouteRounded';
 import LoyaltyRoundedIcon from '@mui/icons-material/LoyaltyRounded';
 import RoomRoundedIcon from '@mui/icons-material/RoomRounded';
+import NotificationsActiveRoundedIcon from '@mui/icons-material/NotificationsActiveRounded';
 
 const AdminSidebar = () => {
   return (
@@ -61,6 +62,15 @@ const AdminSidebar = () => {
                   >
                     <LoyaltyRoundedIcon />
                     <span className="ms-3">Subscriptions</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/admin/notifications"
+                    className="group flex items-center rounded-lg p-2 text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                  >
+                    <NotificationsActiveRoundedIcon />
+                    <span className="ms-3">Notifications</span>
                   </a>
                 </li>
               </ul>
