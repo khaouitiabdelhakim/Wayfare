@@ -2,6 +2,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEnvelope, faLock, faUser } from "@fortawesome/free-solid-svg-icons";
 
 const SigninPage = () => {
   const { push } = useRouter();
@@ -69,14 +71,20 @@ const SigninPage = () => {
                     >
                       Votre Email
                     </label>
-                    <input
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      type="email"
-                      name="email"
-                      placeholder="Entrez votre Email"
-                      className="w-full rounded-sm border border-stroke bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
-                    />
+                    <div className="relative">
+                      <FontAwesomeIcon
+                        icon={faEnvelope}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      />
+                      <input
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        type="email"
+                        name="email"
+                        placeholder="Entrez votre Email"
+                        className="w-full rounded-sm border border-stroke bg-[#f8f8f8] px-10 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
+                      />
+                    </div>
                   </div>
                   <div className="mb-8">
                     <label
@@ -85,14 +93,20 @@ const SigninPage = () => {
                     >
                       Votre Mot de Passe
                     </label>
-                    <input
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      type="password"
-                      name="password"
-                      placeholder="Entrez votre Mot de Passe"
-                      className="w-full rounded-sm border border-stroke bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
-                    />
+                    <div className="relative">
+                      <FontAwesomeIcon
+                        icon={faLock}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      />
+                      <input
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        type="password"
+                        name="password"
+                        placeholder="Entrez votre Mot de Passe"
+                        className="w-full rounded-sm border border-stroke bg-[#f8f8f8] px-10 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
+                      />
+                    </div>
                   </div>
                   <div className="mb-8 flex flex-col justify-between sm:flex-row sm:items-center">
                     <div className="mb-4 sm:mb-0">
@@ -168,6 +182,10 @@ const SigninPage = () => {
                           />
                         </svg>
                       )}
+                      <FontAwesomeIcon
+                        icon={faUser}
+                        className="mr-2 h-4 w-4"
+                      />
                       {isSignIn ? "Connexion..." : "Se connecter"}
                     </button>
                   </div>

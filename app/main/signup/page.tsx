@@ -2,6 +2,15 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faUser,
+  faEnvelope,
+  faPhone,
+  faIdCard,
+  faLock,
+  faUserPlus,
+} from "@fortawesome/free-solid-svg-icons";
 
 const SignupPage = () => {
   const { push } = useRouter();
@@ -83,14 +92,20 @@ const SignupPage = () => {
                       >
                         Prénom
                       </label>
-                      <input
-                        value={formData.firstName}
-                        onChange={handleChange}
-                        type="text"
-                        name="firstName"
-                        placeholder="Entrez votre prénom"
-                        className="w-full rounded-sm border border-stroke bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
-                      />
+                      <div className="relative">
+                        <FontAwesomeIcon
+                          icon={faUser}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                        />
+                        <input
+                          value={formData.firstName}
+                          onChange={handleChange}
+                          type="text"
+                          name="firstName"
+                          placeholder="Entrez votre prénom"
+                          className="w-full rounded-sm border border-stroke bg-[#f8f8f8] px-10 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
+                        />
+                      </div>
                     </div>
                     <div className="w-1/2 pl-2">
                       <label
@@ -99,14 +114,20 @@ const SignupPage = () => {
                       >
                         Nom
                       </label>
-                      <input
-                        value={formData.lastName}
-                        onChange={handleChange}
-                        type="text"
-                        name="lastName"
-                        placeholder="Entrez votre nom"
-                        className="w-full rounded-sm border border-stroke bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
-                      />
+                      <div className="relative">
+                        <FontAwesomeIcon
+                          icon={faUser}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                        />
+                        <input
+                          value={formData.lastName}
+                          onChange={handleChange}
+                          type="text"
+                          name="lastName"
+                          placeholder="Entrez votre nom"
+                          className="w-full rounded-sm border border-stroke bg-[#f8f8f8] px-10 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -118,14 +139,20 @@ const SignupPage = () => {
                       >
                         Votre Email
                       </label>
-                      <input
-                        value={formData.email}
-                        onChange={handleChange}
-                        type="email"
-                        name="email"
-                        placeholder="Entrez votre Email"
-                        className="w-full rounded-sm border border-stroke bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
-                      />
+                      <div className="relative">
+                        <FontAwesomeIcon
+                          icon={faEnvelope}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                        />
+                        <input
+                          value={formData.email}
+                          onChange={handleChange}
+                          type="email"
+                          name="email"
+                          placeholder="Entrez votre Email"
+                          className="w-full rounded-sm border border-stroke bg-[#f8f8f8] px-10 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
+                        />
+                      </div>
                     </div>
                     <div className="w-1/2 pl-2">
                       <label
@@ -134,14 +161,20 @@ const SignupPage = () => {
                       >
                         Numéro de Téléphone
                       </label>
-                      <input
-                        value={formData.phone}
-                        onChange={handleChange}
-                        type="text"
-                        name="phone"
-                        placeholder="Entrez votre numéro de téléphone"
-                        className="w-full rounded-sm border border-stroke bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
-                      />
+                      <div className="relative">
+                        <FontAwesomeIcon
+                          icon={faPhone}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                        />
+                        <input
+                          value={formData.phone}
+                          onChange={handleChange}
+                          type="text"
+                          name="phone"
+                          placeholder="Entrez votre numéro de téléphone"
+                          className="w-full rounded-sm border border-stroke bg-[#f8f8f8] px-10 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -153,14 +186,20 @@ const SignupPage = () => {
                       >
                         CIN (Carte Nationale)
                       </label>
-                      <input
-                        value={formData.cin}
-                        onChange={handleChange}
-                        type="text"
-                        name="cin"
-                        placeholder="Entrez votre CIN"
-                        className="w-full rounded-sm border border-stroke bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
-                      />
+                      <div className="relative">
+                        <FontAwesomeIcon
+                          icon={faIdCard}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                        />
+                        <input
+                          value={formData.cin}
+                          onChange={handleChange}
+                          type="text"
+                          name="cin"
+                          placeholder="Entrez votre CIN"
+                          className="w-full rounded-sm border border-stroke bg-[#f8f8f8] px-10 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
+                        />
+                      </div>
                     </div>
                     <div className="w-1/2 pl-2">
                       <label
@@ -169,14 +208,20 @@ const SignupPage = () => {
                       >
                         Votre Mot de Passe
                       </label>
-                      <input
-                        value={formData.password}
-                        onChange={handleChange}
-                        type="password"
-                        name="password"
-                        placeholder="Entrez votre Mot de Passe"
-                        className="w-full rounded-sm border border-stroke bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
-                      />
+                      <div className="relative">
+                        <FontAwesomeIcon
+                          icon={faLock}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                        />
+                        <input
+                          value={formData.password}
+                          onChange={handleChange}
+                          type="password"
+                          name="password"
+                          placeholder="Entrez votre Mot de Passe"
+                          className="w-full rounded-sm border border-stroke bg-[#f8f8f8] px-10 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -211,6 +256,10 @@ const SignupPage = () => {
                           />
                         </svg>
                       )}
+                      <FontAwesomeIcon
+                        icon={faUserPlus}
+                        className="mr-2 h-4 w-4"
+                      />
                       S&apos;inscrire
                     </button>
                   </div>

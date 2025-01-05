@@ -30,11 +30,14 @@ const AdminHeader = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 z-10 bg-white shadow-md" style={{marginLeft:"240px", width:"calc(100% - 240px)"}}>
+    <header
+      className="fixed left-0 top-0 z-10 bg-white shadow-md"
+      style={{ marginLeft: "240px", width: "calc(100% - 240px)" }}
+    >
       <div className="container mx-auto flex items-center justify-between px-6 py-4">
         {/* Admin Brand */}
         <div className="flex items-center gap-3">
-          <HiMenu className="text-2xl text-gray-700 cursor-pointer lg:hidden" />
+          <HiMenu className="cursor-pointer text-2xl text-gray-700 lg:hidden" />
           <h1 className="text-lg font-bold text-gray-700">Bonjour Admin</h1>
         </div>
 
@@ -58,7 +61,7 @@ const AdminHeader = () => {
             >
               <FaBell className="text-2xl text-gray-700" />
               {notifications.length > 0 && (
-                <span className="absolute top-0 right-0 h-3 w-3 bg-red-500 rounded-full"></span>
+                <span className="absolute right-0 top-0 h-3 w-3 rounded-full bg-red-500"></span>
               )}
             </button>
             {notifOpen && (
@@ -68,7 +71,7 @@ const AdminHeader = () => {
                     notifications.map((notif) => (
                       <div
                         key={notif.id}
-                        className="px-4 py-3 border-b border-gray-200 hover:bg-gray-100 cursor-pointer"
+                        className="cursor-pointer border-b border-gray-200 px-4 py-3 hover:bg-gray-100"
                       >
                         <p className="text-sm font-medium">{notif.text}</p>
                         <p className="text-xs text-gray-500">{notif.time}</p>
@@ -93,23 +96,28 @@ const AdminHeader = () => {
               <img
                 src="https://cdn0.iconfinder.com/data/icons/man-user-human-profile-avatar-business-person/100/09B-1User-512.png"
                 alt="Avatar"
-                className="w-7 h-7 rounded-full object-cover"
+                className="h-7 w-7 rounded-full object-cover"
               />
             </button>
 
             {dropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 rounded-md bg-white shadow-lg">
                 <ul className="py-2 text-gray-700">
-                  <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                  <li
+                    className="flex cursor-pointer items-center px-4 py-2 hover:bg-gray-100"
+                    onClick={() => {
+                      router.push("/user/profile");
+                    }}
+                  >
                     <FaUserCircle className="mr-3" />
                     Profile
                   </li>
-                  <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                  <li className="flex cursor-pointer items-center px-4 py-2 hover:bg-gray-100">
                     <FaCog className="mr-3" />
                     Settings
                   </li>
                   <li
-                    className="flex items-center px-4 py-2 text-red-500 hover:bg-gray-100 cursor-pointer"
+                    className="flex cursor-pointer items-center px-4 py-2 text-red-500 hover:bg-gray-100"
                     onClick={handleSignOut}
                   >
                     <FaSignOutAlt className="mr-3" />

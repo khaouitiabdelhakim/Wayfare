@@ -17,6 +17,8 @@
     "@firebase/database": "^1.0.3",
     "@firebase/firestore": "^4.3.2",
     "@firebase/storage": "^0.11.2",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
     "@material-tailwind/react": "^2.1.10",
     "@mui/icons-material": "^6.3.1",
     "@mui/material": "^6.3.1",

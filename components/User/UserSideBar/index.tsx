@@ -27,11 +27,11 @@ const UserSidebar = () => {
           {/* Reservations */}
           <li>
             <a
-              href="/user/reservations"
+              href="/user/tickets"
               className="group flex items-center rounded-lg p-2 text-gray-900 hover:bg-gray-100"
             >
               <EventNoteRoundedIcon />
-              <span className="ms-3">Reservations</span>
+              <span className="ms-3">Tickets</span>
             </a>
           </li>
 

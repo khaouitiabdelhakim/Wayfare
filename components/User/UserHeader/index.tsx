@@ -90,7 +90,8 @@ const UserHeader = () => {
             {dropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 rounded-md bg-white shadow-lg">
                 <ul className="py-2 text-gray-700">
-                  <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                  <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => { router.push("/user/profile") }}>
                     <FaUserCircle className="mr-3" />
                     Profile
                   </li>
