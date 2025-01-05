@@ -149,7 +149,7 @@ const AdminDashboard = () => {
       {/* Shortcuts Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <Link
-          href="/users"
+          href="/admin/users"
           className="p-4 bg-white rounded-lg shadow hover:bg-gray-100 flex items-center"
         >
           <FaUsers className="text-2xl mr-4 text-orange-500" />
@@ -159,7 +159,7 @@ const AdminDashboard = () => {
           </div>
         </Link>
         <Link
-          href="/subscriptions"
+          href="/admin/subscriptions"
           className="p-4 bg-white rounded-lg shadow hover:bg-gray-100 flex items-center"
         >
           <FaTicketAlt className="text-2xl mr-4 text-orange-500" />
@@ -169,7 +169,7 @@ const AdminDashboard = () => {
           </div>
         </Link>
         <Link
-          href="/buses"
+          href="/admin/buses"
           className="p-4 bg-white rounded-lg shadow hover:bg-gray-100 flex items-center"
         >
           <FaBus className="text-2xl mr-4 text-orange-500" />
@@ -179,7 +179,7 @@ const AdminDashboard = () => {
           </div>
         </Link>
         <Link
-          href="/payments"
+          href="/admin/payments"
           className="p-4 bg-white rounded-lg shadow hover:bg-gray-100 flex items-center"
         >
           <FaMoneyBill className="text-2xl mr-4 text-orange-500" />
@@ -189,7 +189,7 @@ const AdminDashboard = () => {
           </div>
         </Link>
         <Link
-          href="/notifications"
+          href="/admin/notifications"
           className="p-4 bg-white rounded-lg shadow hover:bg-gray-100 flex items-center"
         >
           <FaBell className="text-2xl mr-4 text-orange-500" />
