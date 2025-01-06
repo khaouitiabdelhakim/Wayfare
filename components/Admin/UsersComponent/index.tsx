@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { FaEdit, FaKey, FaTrash, FaBell } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import {
+  FaEdit,
+  FaKey,
+  FaTrash,
+  FaBell,
   FaUser,
   FaEnvelope,
   FaPhone,
@@ -44,7 +48,14 @@ class Notification {
   message: string;
   status: boolean;
 
-  constructor(id: number, senderId: number, receiverId: number, type: NotificationType, message: string, status: boolean) {
+  constructor(
+    id: number,
+    senderId: number,
+    receiverId: number,
+    type: NotificationType,
+    message: string,
+    status: boolean
+  ) {
     this.id = id;
     this.senderId = senderId;
     this.receiverId = receiverId;
@@ -55,61 +66,85 @@ class Notification {
 }
 
 const UserList = () => {
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: 1,
-      firstName: "John",
-      lastName: "Doe",
-      email: "john.doe@example.com",
-      phoneNumber: "+1 234 567 8900",
-      address: "123 Main St, City, Country",
-      role: Role.ADMIN,
-    },
-    {
-      id: 2,
-      firstName: "Jane",
-      lastName: "Smith",
-      email: "jane.smith@example.com",
-      phoneNumber: "+1 234 567 8901",
-      address: "456 Oak Ave, City, Country",
-      role: Role.PASSENGER,
-    },
-  ]);
-
+  const [users, setUsers] = useState<User[]>([]);
   const [showPopup, setShowPopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [showNotificationPopup, setShowNotificationPopup] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [notificationMessage, setNotificationMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const filteredUsers = users.filter(
-    (user) =>
-      `${user.firstName} ${user.lastName}`
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.address.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  // Fetch all users on component mount
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get("/api/v1/passengers/");
+      setUsers(response.data);
+    } catch (error) {
+      setError("Failed to fetch users. Please try again.");
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  // Add new user
+  const handleAddUser = async (userData: Omit<User, "id">) => {
+    try {
+      const response = await axios.post("/api/v1/passengers/register", userData);
+      setUsers([...users, response.data]);
+      setShowPopup(false);
+    } catch (error) {
+      setError("Failed to add user. Please try again.");
+      console.error("Error adding user:", error);
+    }
+  };
+
+  // Edit existing user
   const handleEditUser = (user: User) => {
     setSelectedUser(user);
     setShowEditPopup(true);
   };
 
-  const handleSaveEdit = () => {
+  // Save edited user
+  const handleSaveEdit = async () => {
     if (selectedUser) {
-      setUsers(
-        users.map((user) =>
-          user.id === selectedUser.id ? selectedUser : user,
-        ),
-      );
-      setShowEditPopup(false);
-      setSelectedUser(null);
+      try {
+        const response = await axios.put(
+          `/api/v1/passengers/${selectedUser.id}`,
+          selectedUser
+        );
+        setUsers(
+          users.map((user) =>
+            user.id === selectedUser.id ? response.data : user
+          )
+        );
+        setShowEditPopup(false);
+        setSelectedUser(null);
+      } catch (error) {
+        setError("Failed to update user. Please try again.");
+        console.error("Error updating user:", error);
+      }
     }
   };
 
+  // Delete user
+  const handleDeleteUser = async (id: number) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      try {
+        await axios.delete(`/api/v1/passengers/${id}`);
+        setUsers(users.filter((user) => user.id !== id));
+      } catch (error) {
+        setError("Failed to delete user. Please try again.");
+        console.error("Error deleting user:", error);
+      }
+    }
+  };
+
+  // Send notification
   const handleSendNotification = (user: User) => {
     setSelectedUser(user);
     setShowNotificationPopup(true);
@@ -132,12 +167,24 @@ const UserList = () => {
     }
   };
 
+  // Filter users based on search
+  const filteredUsers = users.filter(
+    (user) =>
+      `${user.firstName} ${user.lastName}`
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.address.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="rounded-lg bg-gray-50 p-6 shadow-lg">
       <h2 className="mb-4 text-xl font-bold text-orange-800">
         Liste des utilisateurs
       </h2>
 
+      {/* Search Bar */}
       <input
         type="text"
         placeholder="Rechercher par nom, email, téléphone ou adresse"
@@ -146,6 +193,10 @@ const UserList = () => {
         onChange={(e) => setSearchQuery(e.target.value)}
       />
 
+      {/* Error Message */}
+      {error && <div className="mb-4 text-center text-red-500">{error}</div>}
+
+      {/* Add User Button */}
       <button
         className="rounded bg-orange-500 px-4 py-2 text-white shadow hover:bg-orange-600"
         onClick={() => setShowPopup(true)}
@@ -155,6 +206,7 @@ const UserList = () => {
       <br />
       <br />
 
+      {/* User List */}
       <ul className="mb-6 space-y-4">
         {filteredUsers.map((user) => (
           <li
@@ -198,7 +250,7 @@ const UserList = () => {
             <div className="flex gap-2">
               <button
                 className="flex items-center gap-2 rounded bg-blue-500 px-4 py-2 text-white shadow hover:bg-blue-600"
-                onClick={() => alert("Delete user")}
+                onClick={() => handleDeleteUser(user.id)}
               >
                 <FaTrash /> Delete
               </button>
@@ -227,40 +279,83 @@ const UserList = () => {
         ))}
       </ul>
 
+      {/* Add User Popup */}
       {showPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
             <h3 className="mb-4 text-lg font-bold text-orange-800">
               Ajouter un utilisateur
             </h3>
-            <form>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                handleAddUser({
+                  firstName: formData.get("firstName") as string,
+                  lastName: formData.get("lastName") as string,
+                  email: formData.get("email") as string,
+                  phoneNumber: formData.get("phoneNumber") as string,
+                  address: formData.get("address") as string,
+                  role: formData.get("role") as Role,
+                });
+              }}
+            >
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">Prénom</label>
-                <input type="text" className="w-full rounded-lg border p-2" />
+                <input
+                  name="firstName"
+                  type="text"
+                  className="w-full rounded-lg border p-2"
+                  required
+                />
               </div>
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">Nom</label>
-                <input type="text" className="w-full rounded-lg border p-2" />
+                <input
+                  name="lastName"
+                  type="text"
+                  className="w-full rounded-lg border p-2"
+                  required
+                />
               </div>
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">Email</label>
-                <input type="email" className="w-full rounded-lg border p-2" />
+                <input
+                  name="email"
+                  type="email"
+                  className="w-full rounded-lg border p-2"
+                  required
+                />
               </div>
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">
                   Téléphone
                 </label>
-                <input type="tel" className="w-full rounded-lg border p-2" />
+                <input
+                  name="phoneNumber"
+                  type="tel"
+                  className="w-full rounded-lg border p-2"
+                  required
+                />
               </div>
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">
                   Adresse
                 </label>
-                <input type="text" className="w-full rounded-lg border p-2" />
+                <input
+                  name="address"
+                  type="text"
+                  className="w-full rounded-lg border p-2"
+                  required
+                />
               </div>
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">Role</label>
-                <select className="w-full rounded-lg border p-2">
+                <select
+                  name="role"
+                  className="w-full rounded-lg border p-2"
+                  required
+                >
                   <option value={Role.ADMIN}>Admin</option>
                   <option value={Role.PASSENGER}>Passenger</option>
                 </select>
@@ -274,7 +369,7 @@ const UserList = () => {
                   Annuler
                 </button>
                 <button
-                  type="button"
+                  type="submit"
                   className="rounded bg-orange-500 px-4 py-2 text-white shadow hover:bg-orange-600"
                 >
                   Ajouter
@@ -285,6 +380,7 @@ const UserList = () => {
         </div>
       )}
 
+      {/* Edit User Popup */}
       {showEditPopup && selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
@@ -384,6 +480,7 @@ const UserList = () => {
         </div>
       )}
 
+      {/* Notification Popup */}
       {showNotificationPopup && selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">

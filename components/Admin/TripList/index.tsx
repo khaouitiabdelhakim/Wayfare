@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import {
   FaEdit,
   FaTrash,
@@ -91,72 +92,73 @@ class Trip {
 }
 
 const TripList = () => {
-  // Sample data
-  const [buses] = useState<Bus[]>([
-    new Bus(1, "ABC-123", 50),
-    new Bus(2, "XYZ-456", 60),
-  ]);
-
-  const [busStops] = useState<BusStop[]>([
-    new BusStop(1, "Central Station", "Downtown"),
-    new BusStop(2, "Airport Terminal", "Airport Area"),
-    new BusStop(3, "Shopping Mall", "Suburb"),
-  ]);
-
-  const [routes] = useState<Route[]>([
-    new Route(1, busStops[0], busStops[1], 15.5, 30),
-    new Route(2, busStops[1], busStops[2], 8.2, 20),
-  ]);
-
-  const [trips, setTrips] = useState<Trip[]>([
-    new Trip(
-      1,
-      buses[0],
-      routes[0],
-      "2025-01-06T08:00",
-      "2025-01-06T08:30",
-      25.0,
-      true,
-    ),
-    new Trip(
-      2,
-      buses[1],
-      routes[1],
-      "2025-01-06T09:00",
-      "2025-01-06T09:20",
-      15.5,
-      true,
-    ),
-  ]);
-
+  const [buses, setBuses] = useState<Bus[]>([]);
+  const [busStops, setBusStops] = useState<BusStop[]>([]);
+  const [routes, setRoutes] = useState<Route[]>([]);
+  const [trips, setTrips] = useState<Trip[]>([]);
   const [showAddPopup, setShowAddPopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Fetch all buses, bus stops, routes, and trips on component mount
+  useEffect(() => {
+    fetchBuses();
+    fetchBusStops();
+    fetchRoutes();
+    fetchTrips();
+  }, []);
+
+  const fetchBuses = async () => {
+    try {
+      const response = await axios.get("/api/v1/buses");
+      setBuses(response.data);
+    } catch (error) {
+      console.error("Error fetching buses:", error);
+    }
+  };
+
+  const fetchBusStops = async () => {
+    try {
+      const response = await axios.get("/api/v1/busStops");
+      setBusStops(response.data);
+    } catch (error) {
+      console.error("Error fetching bus stops:", error);
+    }
+  };
+
+  const fetchRoutes = async () => {
+    try {
+      const response = await axios.get("/api/v1/routes");
+      setRoutes(response.data);
+    } catch (error) {
+      console.error("Error fetching routes:", error);
+    }
+  };
+
+  const fetchTrips = async () => {
+    try {
+      const response = await axios.get("/api/v1/trips");
+      setTrips(response.data);
+    } catch (error) {
+      console.error("Error fetching trips:", error);
+    }
+  };
+
   // Add new trip
-  const handleAddTrip = (tripData: {
+  const handleAddTrip = async (tripData: {
     busId: number;
     routeId: number;
     departureTime: string;
     arrivalTime: string;
     price: number;
   }) => {
-    const bus = buses.find((b) => b.id === Number(tripData.busId));
-    const route = routes.find((r) => r.id === Number(tripData.routeId));
-
-    if (bus && route) {
-      const newId = Math.max(...trips.map((t) => t.id)) + 1;
-      const newTrip = new Trip(
-        newId,
-        bus,
-        route,
-        tripData.departureTime,
-        tripData.arrivalTime,
-        tripData.price,
-      );
-      setTrips([...trips, newTrip]);
+    try {
+      const response = await axios.post("/api/v1/trips", tripData);
+      setTrips([...trips, response.data]);
       setShowAddPopup(false);
+    } catch (error) {
+      console.error("Error adding trip:", error);
     }
   };
 
@@ -167,22 +169,28 @@ const TripList = () => {
   };
 
   // Delete trip
-  const handleDeleteTrip = (id: number) => {
+  const handleDeleteTrip = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this trip?")) {
-      setTrips(trips.filter((trip) => trip.id !== id));
+      try {
+        await axios.delete(`/api/v1/trips/${id}`);
+        setTrips(trips.filter((trip) => trip.id !== id));
+      } catch (error) {
+        console.error("Error deleting trip:", error);
+      }
     }
   };
 
   // Save edited trip
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (selectedTrip) {
-      setTrips(
-        trips.map((trip) =>
-          trip.id === selectedTrip.id ? selectedTrip : trip,
-        ),
-      );
-      setShowEditPopup(false);
-      setSelectedTrip(null);
+      try {
+        const response = await axios.put(`/api/v1/trips/${selectedTrip.id}`, selectedTrip);
+        setTrips(trips.map((trip) => (trip.id === selectedTrip.id ? response.data : trip)));
+        setShowEditPopup(false);
+        setSelectedTrip(null);
+      } catch (error) {
+        console.error("Error updating trip:", error);
+      }
     }
   };
 

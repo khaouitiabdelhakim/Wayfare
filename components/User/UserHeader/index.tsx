@@ -1,18 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FaUserCircle, FaSignOutAlt, FaBell } from "react-icons/fa";
+import axios from "axios";
 
-const UserHeader = () => {
+interface Notification {
+  id: number;
+  senderId: number;
+  receiverId: number;
+  type: string;
+  message: string;
+  status: boolean;
+  createdAt: string;
+}
+
+const UserHeader = ({ userId }: { userId: number }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const notifications = [
-    { id: 1, text: "Your subscription has been renewed", time: "2 hours ago" },
-    { id: 2, text: "Reservation confirmed for Jan 15", time: "1 day ago" },
-  ];
+  // Fetch notifications for the user
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8086/api/v1/notifications/list/receiverId=${userId}`
+        );
+        setNotifications(response.data);
+      } catch (err) {
+        setError("Failed to fetch notifications. Please try again.");
+        console.error("Error fetching notifications:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, [userId]);
 
   const handleSignOut = () => {
     // Add sign-out logic here
@@ -20,8 +48,28 @@ const UserHeader = () => {
     router.push("/login");
   };
 
+  // Format notification time
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) {
+      return `${diffInSeconds} seconds ago`;
+    } else if (diffInSeconds < 3600) {
+      return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    } else if (diffInSeconds < 86400) {
+      return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    } else {
+      return `${Math.floor(diffInSeconds / 86400)} days ago`;
+    }
+  };
+
   return (
-    <header className="fixed top-0 left-0 z-10  bg-white shadow-md" style={{marginLeft:"240px", width:"calc(100% - 240px)"}}>
+    <header
+      className="fixed top-0 left-0 z-10 bg-white shadow-md"
+      style={{ marginLeft: "240px", width: "calc(100% - 240px)" }}
+    >
       <div className="container mx-auto flex items-center justify-between px-6 py-4">
         {/* User Greeting */}
         <div className="flex items-center gap-3">
@@ -54,14 +102,20 @@ const UserHeader = () => {
             {notifOpen && (
               <div className="absolute right-0 mt-2 w-72 rounded-md bg-white shadow-lg">
                 <div className="py-2 text-gray-700">
-                  {notifications.length > 0 ? (
+                  {loading ? (
+                    <div className="px-4 py-3 text-sm text-gray-500">
+                      Loading notifications...
+                    </div>
+                  ) : notifications.length > 0 ? (
                     notifications.map((notif) => (
                       <div
                         key={notif.id}
                         className="px-4 py-3 border-b border-gray-200 hover:bg-gray-100 cursor-pointer"
                       >
-                        <p className="text-sm font-medium">{notif.text}</p>
-                        <p className="text-xs text-gray-500">{notif.time}</p>
+                        <p className="text-sm font-medium">{notif.message}</p>
+                        <p className="text-xs text-gray-500">
+                          {formatTime(notif.createdAt)}
+                        </p>
                       </div>
                     ))
                   ) : (
@@ -90,8 +144,12 @@ const UserHeader = () => {
             {dropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 rounded-md bg-white shadow-lg">
                 <ul className="py-2 text-gray-700">
-                  <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                  onClick={() => { router.push("/user/profile") }}>
+                  <li
+                    className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => {
+                      router.push("/user/profile");
+                    }}
+                  >
                     <FaUserCircle className="mr-3" />
                     Profile
                   </li>

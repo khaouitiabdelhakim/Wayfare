@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import {
   FaUser,
   FaEnvelope,
@@ -32,29 +33,34 @@ interface Passenger extends User {
   profilePicture: string | null;
 }
 
-const Profile = () => {
-  // Sample initial data - would normally come from API
-  const [profile, setProfile] = useState<Passenger>({
-    id: 1,
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    role: Role.PASSENGER,
-    phone: "+1 234 567 8900",
-    address: "123 Main St, City, Country",
-    profilePicture: null,
-  });
-
+const Profile = ({ userId }: { userId: number }) => {
+  const [profile, setProfile] = useState<Passenger | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedProfile, setEditedProfile] = useState<Passenger>(profile);
+  const [editedProfile, setEditedProfile] = useState<Passenger | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Fetch user profile data
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get(`/api/v1/passengers/${userId}`);
+        setProfile(response.data);
+        setEditedProfile(response.data);
+      } catch (err) {
+        setError("Failed to fetch profile. Please try again.");
+        console.error("Error fetching profile:", err);
+      }
+    };
+
+    fetchProfile();
+  }, [userId]);
+
   // Handle image upload
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
+    if (file && editedProfile) {
       const reader = new FileReader();
       reader.onload = (e) => {
         setEditedProfile({
@@ -73,6 +79,7 @@ const Profile = () => {
 
   // Form validation
   const validateForm = () => {
+    if (!editedProfile) return "Profile data is missing.";
     if (!editedProfile.firstName.trim()) return "First name is required";
     if (!editedProfile.lastName.trim()) return "Last name is required";
     if (!editedProfile.email.trim()) return "Email is required";
@@ -85,6 +92,8 @@ const Profile = () => {
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!editedProfile) return;
+
     const validationError = validateForm();
     if (validationError) {
       setError(validationError);
@@ -95,14 +104,16 @@ const Profile = () => {
     setError(null);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setProfile(editedProfile);
+      // Update profile on the backend
+      const response = await axios.put(
+        `/api/v1/passengers/${userId}`,
+        editedProfile
+      );
+      setProfile(response.data);
       setIsEditing(false);
-      // In real app, would make API call here:
-      // await updateProfile(editedProfile);
     } catch (err) {
       setError("Failed to update profile. Please try again.");
+      console.error("Error updating profile:", err);
     } finally {
       setIsLoading(false);
     }
@@ -110,10 +121,16 @@ const Profile = () => {
 
   // Cancel editing
   const handleCancel = () => {
-    setEditedProfile(profile);
-    setIsEditing(false);
-    setError(null);
+    if (profile) {
+      setEditedProfile(profile);
+      setIsEditing(false);
+      setError(null);
+    }
   };
+
+  if (!profile) {
+    return <div>Loading profile...</div>;
+  }
 
   return (
     <div className="mx-auto max-w-4xl rounded-lg bg-white p-6 shadow-lg">
@@ -132,7 +149,7 @@ const Profile = () => {
       <div className="mb-8 flex flex-col items-center">
         <div className="relative">
           <div className="mb-4 h-32 w-32 overflow-hidden rounded-full">
-            {editedProfile.profilePicture ? (
+            {editedProfile?.profilePicture ? (
               <img
                 src={editedProfile.profilePicture}
                 alt="Profile"
@@ -165,7 +182,7 @@ const Profile = () => {
         <h2 className="mt-4 text-xl font-semibold">
           {profile.firstName} {profile.lastName}
         </h2>
-        <span className="text-sm text-gray-500">{Role.PASSENGER}</span>
+        <span className="text-sm text-gray-500">{profile.role}</span>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -177,8 +194,9 @@ const Profile = () => {
             </label>
             <input
               type="text"
-              value={editedProfile.firstName}
+              value={editedProfile?.firstName || ""}
               onChange={(e) =>
+                editedProfile &&
                 setEditedProfile({ ...editedProfile, firstName: e.target.value })
               }
               disabled={!isEditing}
@@ -193,8 +211,9 @@ const Profile = () => {
             </label>
             <input
               type="text"
-              value={editedProfile.lastName}
+              value={editedProfile?.lastName || ""}
               onChange={(e) =>
+                editedProfile &&
                 setEditedProfile({ ...editedProfile, lastName: e.target.value })
               }
               disabled={!isEditing}
@@ -211,8 +230,9 @@ const Profile = () => {
               <FaEnvelope className="mr-2 text-gray-400" />
               <input
                 type="email"
-                value={editedProfile.email}
+                value={editedProfile?.email || ""}
                 onChange={(e) =>
+                  editedProfile &&
                   setEditedProfile({ ...editedProfile, email: e.target.value })
                 }
                 disabled={!isEditing}
@@ -230,8 +250,9 @@ const Profile = () => {
               <FaPhone className="mr-2 text-gray-400" />
               <input
                 type="tel"
-                value={editedProfile.phone}
+                value={editedProfile?.phone || ""}
                 onChange={(e) =>
+                  editedProfile &&
                   setEditedProfile({ ...editedProfile, phone: e.target.value })
                 }
                 disabled={!isEditing}
@@ -249,8 +270,9 @@ const Profile = () => {
           <div className="flex items-start">
             <FaMapMarkerAlt className="mr-2 mt-3 text-gray-400" />
             <textarea
-              value={editedProfile.address}
+              value={editedProfile?.address || ""}
               onChange={(e) =>
+                editedProfile &&
                 setEditedProfile({ ...editedProfile, address: e.target.value })
               }
               disabled={!isEditing}

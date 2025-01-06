@@ -1,6 +1,7 @@
 import React from "react";
 import LoyaltyRoundedIcon from "@mui/icons-material/LoyaltyRounded";
 import EventNoteRoundedIcon from "@mui/icons-material/EventNoteRounded";
+import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded"; // Import Payment Icon
 
 const UserSidebar = () => {
   return (
@@ -43,6 +44,17 @@ const UserSidebar = () => {
             >
               <LoyaltyRoundedIcon />
               <span className="ms-3">Subscriptions</span>
+            </a>
+          </li>
+
+          {/* Payments */}
+          <li>
+            <a
+              href="/user/payments"
+              className="group flex items-center rounded-lg p-2 text-gray-900 hover:bg-gray-100"
+            >
+              <PaymentRoundedIcon /> {/* Payment Icon */}
+              <span className="ms-3">Payments</span>
             </a>
           </li>
         </ul>

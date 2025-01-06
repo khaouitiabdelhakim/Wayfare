@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import {
   FaEdit,
   FaTrash,
@@ -23,21 +24,35 @@ class BusStop {
 }
 
 const BusStopList = () => {
-  const [busStops, setBusStops] = useState<BusStop[]>([
-    new BusStop(1, "Central Station", "123 Main Street"),
-    new BusStop(2, "Shopping Mall", "456 Market Avenue"),
-  ]);
-
+  const [busStops, setBusStops] = useState<BusStop[]>([]);
   const [showAddPopup, setShowAddPopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [selectedBusStop, setSelectedBusStop] = useState<BusStop | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Fetch all bus stops on component mount
+  useEffect(() => {
+    fetchBusStops();
+  }, []);
+
+  const fetchBusStops = async () => {
+    try {
+      const response = await axios.get("/api/v1/busStops/");
+      setBusStops(response.data);
+    } catch (error) {
+      console.error("Error fetching bus stops:", error);
+    }
+  };
+
   // Add new bus stop
-  const handleAddBusStop = (busStop: Omit<BusStop, "id">) => {
-    const newId = Math.max(...busStops.map(b => b.id)) + 1;
-    setBusStops([...busStops, new BusStop(newId, busStop.name, busStop.location)]);
-    setShowAddPopup(false);
+  const handleAddBusStop = async (busStop: Omit<BusStop, "id">) => {
+    try {
+      const response = await axios.post("/api/v1/busStops/", busStop);
+      setBusStops([...busStops, response.data]);
+      setShowAddPopup(false);
+    } catch (error) {
+      console.error("Error adding bus stop:", error);
+    }
   };
 
   // Edit existing bus stop
@@ -47,20 +62,30 @@ const BusStopList = () => {
   };
 
   // Delete bus stop
-  const handleDeleteBusStop = (id: number) => {
+  const handleDeleteBusStop = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this bus stop?")) {
-      setBusStops(busStops.filter((busStop) => busStop.id !== id));
+      try {
+        await axios.delete(`/api/v1/busStops/${id}`);
+        setBusStops(busStops.filter((busStop) => busStop.id !== id));
+      } catch (error) {
+        console.error("Error deleting bus stop:", error);
+      }
     }
   };
 
   // Save edited bus stop
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (selectedBusStop) {
-      setBusStops(busStops.map((busStop) => 
-        (busStop.id === selectedBusStop.id ? selectedBusStop : busStop)
-      ));
-      setShowEditPopup(false);
-      setSelectedBusStop(null);
+      try {
+        const response = await axios.put(`/api/v1/busStops/${selectedBusStop.id}`, selectedBusStop);
+        setBusStops(busStops.map((busStop) => 
+          (busStop.id === selectedBusStop.id ? response.data : busStop)
+        ));
+        setShowEditPopup(false);
+        setSelectedBusStop(null);
+      } catch (error) {
+        console.error("Error updating bus stop:", error);
+      }
     }
   };
 

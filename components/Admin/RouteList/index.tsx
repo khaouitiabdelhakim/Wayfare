@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import { 
   FaEdit, 
   FaTrash, 
@@ -43,39 +44,50 @@ class Route {
 }
 
 const RouteList = () => {
-  // Sample bus stops
-  const [busStops] = useState<BusStop[]>([
-    new BusStop(1, "Central Station", "Downtown"),
-    new BusStop(2, "Airport Terminal", "Airport Area"),
-    new BusStop(3, "Shopping Mall", "Suburb"),
-    new BusStop(4, "University", "Campus Area")
-  ]);
-
-  const [routes, setRoutes] = useState<Route[]>([
-    new Route(1, busStops[0], busStops[1], 15.5, 30),
-    new Route(2, busStops[2], busStops[3], 8.2, 20)
-  ]);
-
+  const [busStops, setBusStops] = useState<BusStop[]>([]);
+  const [routes, setRoutes] = useState<Route[]>([]);
   const [showAddPopup, setShowAddPopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Fetch all bus stops and routes on component mount
+  useEffect(() => {
+    fetchBusStops();
+    fetchRoutes();
+  }, []);
+
+  const fetchBusStops = async () => {
+    try {
+      const response = await axios.get("/api/v1/busStops/");
+      setBusStops(response.data);
+    } catch (error) {
+      console.error("Error fetching bus stops:", error);
+    }
+  };
+
+  const fetchRoutes = async () => {
+    try {
+      const response = await axios.get("/api/v1/routes/");
+      setRoutes(response.data);
+    } catch (error) {
+      console.error("Error fetching routes:", error);
+    }
+  };
+
   // Add new route
-  const handleAddRoute = (routeData: {
+  const handleAddRoute = async (routeData: {
     sourceId: number;
     destinationId: number;
     distance: number;
     duration: number;
   }) => {
-    const source = busStops.find(stop => stop.id === Number(routeData.sourceId));
-    const destination = busStops.find(stop => stop.id === Number(routeData.destinationId));
-    
-    if (source && destination) {
-      const newId = Math.max(...routes.map(r => r.id)) + 1;
-      const newRoute = new Route(newId, source, destination, routeData.distance, routeData.duration);
-      setRoutes([...routes, newRoute]);
+    try {
+      const response = await axios.post("/api/v1/routes/", routeData);
+      setRoutes([...routes, response.data]);
       setShowAddPopup(false);
+    } catch (error) {
+      console.error("Error adding route:", error);
     }
   };
 
@@ -86,18 +98,28 @@ const RouteList = () => {
   };
 
   // Delete route
-  const handleDeleteRoute = (id: number) => {
+  const handleDeleteRoute = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this route?")) {
-      setRoutes(routes.filter((route) => route.id !== id));
+      try {
+        await axios.delete(`/api/v1/routes/${id}`);
+        setRoutes(routes.filter((route) => route.id !== id));
+      } catch (error) {
+        console.error("Error deleting route:", error);
+      }
     }
   };
 
   // Save edited route
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (selectedRoute) {
-      setRoutes(routes.map((route) => (route.id === selectedRoute.id ? selectedRoute : route)));
-      setShowEditPopup(false);
-      setSelectedRoute(null);
+      try {
+        const response = await axios.put(`/api/v1/routes/${selectedRoute.id}`, selectedRoute);
+        setRoutes(routes.map((route) => (route.id === selectedRoute.id ? response.data : route)));
+        setShowEditPopup(false);
+        setSelectedRoute(null);
+      } catch (error) {
+        console.error("Error updating route:", error);
+      }
     }
   };
 

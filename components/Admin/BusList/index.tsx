@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import { 
   FaEdit, 
   FaTrash, 
@@ -31,21 +32,35 @@ class Bus {
 }
 
 const BusList = () => {
-  const [buses, setBuses] = useState<Bus[]>([
-    new Bus(1, "ABC-123", 50, "https://assets.volvo.com/is/image/VolvoInformationTechnologyAB/1860x1050-volvo-9700-CGI1?size=1280,720&scl=1", true),
-    new Bus(2, "XYZ-456", 60, "https://assets.volvo.com/is/image/VolvoInformationTechnologyAB/1860x1050-Volvo-9700DD-front45?size=1280,720&scl=1", true),
-  ]);
-
+  const [buses, setBuses] = useState<Bus[]>([]);
   const [showAddPopup, setShowAddPopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [selectedBus, setSelectedBus] = useState<Bus | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Fetch all buses on component mount
+  useEffect(() => {
+    fetchBuses();
+  }, []);
+
+  const fetchBuses = async () => {
+    try {
+      const response = await axios.get("/api/v1/bus");
+      setBuses(response.data);
+    } catch (error) {
+      console.error("Error fetching buses:", error);
+    }
+  };
+
   // Add new bus
-  const handleAddBus = (bus: Omit<Bus, "id">) => {
-    const newId = Math.max(...buses.map(b => b.id)) + 1;
-    setBuses([...buses, new Bus(newId, bus.plateNumber, bus.capacity, bus.imageUrl)]);
-    setShowAddPopup(false);
+  const handleAddBus = async (bus: Omit<Bus, "id">) => {
+    try {
+      const response = await axios.post("/api/v1/bus", bus);
+      setBuses([...buses, response.data]);
+      setShowAddPopup(false);
+    } catch (error) {
+      console.error("Error adding bus:", error);
+    }
   };
 
   // Edit existing bus
@@ -55,18 +70,28 @@ const BusList = () => {
   };
 
   // Delete bus
-  const handleDeleteBus = (id: number) => {
+  const handleDeleteBus = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this bus?")) {
-      setBuses(buses.filter((bus) => bus.id !== id));
+      try {
+        await axios.delete(`/api/v1/bus/${id}`);
+        setBuses(buses.filter((bus) => bus.id !== id));
+      } catch (error) {
+        console.error("Error deleting bus:", error);
+      }
     }
   };
 
   // Save edited bus
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (selectedBus) {
-      setBuses(buses.map((bus) => (bus.id === selectedBus.id ? selectedBus : bus)));
-      setShowEditPopup(false);
-      setSelectedBus(null);
+      try {
+        const response = await axios.put(`/api/v1/bus/${selectedBus.id}`, selectedBus);
+        setBuses(buses.map((bus) => (bus.id === selectedBus.id ? response.data : bus)));
+        setShowEditPopup(false);
+        setSelectedBus(null);
+      } catch (error) {
+        console.error("Error updating bus:", error);
+      }
     }
   };
 

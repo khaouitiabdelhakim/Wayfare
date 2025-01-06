@@ -106,7 +106,7 @@ const AdminHeader = () => {
                   <li
                     className="flex cursor-pointer items-center px-4 py-2 hover:bg-gray-100"
                     onClick={() => {
-                      router.push("/user/profile");
+                      router.push("/admin/profile");
                     }}
                   >
                     <FaUserCircle className="mr-3" />

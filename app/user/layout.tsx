@@ -19,7 +19,7 @@ export default function RootLayout({
 
           {/* Main Content */}
           <main className="flex-1 ml-64 lg:ml-0 bg-gray-100">
-            <UserHeader/>
+            <UserHeader userId={1}/>
             <div className=" p-4" style={{paddingTop:90}}>{children}</div>
           </main>
         </div>

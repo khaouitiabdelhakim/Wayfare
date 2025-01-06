@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import {
   FaEdit,
   FaTrash,
@@ -81,69 +82,64 @@ class Subscription {
 }
 
 const SubscriptionList = () => {
-  // Sample data
-  const [subscriptionTypes] = useState<SubscriptionType[]>([
-    new SubscriptionType(1, "Monthly Pass", 99.99, 30),
-    new SubscriptionType(2, "Quarterly Pass", 269.99, 90),
-    new SubscriptionType(3, "Annual Pass", 999.99, 365),
-  ]);
-
-  const [passengers] = useState<Passenger[]>([
-    new Passenger(1, "John", "Doe", "john@example.com", "+1234567890"),
-    new Passenger(2, "Jane", "Smith", "jane@example.com", "+1987654321"),
-  ]);
-
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([
-    new Subscription(
-      1,
-      subscriptionTypes[0],
-      passengers[0],
-      "2025-01-01T00:00",
-      "2025-01-31T23:59",
-      true
-    ),
-    new Subscription(
-      2,
-      subscriptionTypes[2],
-      passengers[1],
-      "2025-01-01T00:00",
-      "2025-12-31T23:59",
-      true
-    ),
-  ]);
-
+  const [subscriptionTypes, setSubscriptionTypes] = useState<SubscriptionType[]>([]);
+  const [passengers, setPassengers] = useState<Passenger[]>([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [showAddPopup, setShowAddPopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
-  const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(
-    null
-  );
+  const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // Fetch all subscription types, passengers, and subscriptions on component mount
+  useEffect(() => {
+    fetchSubscriptionTypes();
+    fetchPassengers();
+    fetchSubscriptions();
+  }, []);
+
+  const fetchSubscriptionTypes = async () => {
+    try {
+      const response = await axios.get("/api/v1/subscription-types/");
+      setSubscriptionTypes(response.data);
+    } catch (error) {
+      console.error("Error fetching subscription types:", error);
+    }
+  };
+
+  const fetchPassengers = async () => {
+    try {
+      const response = await axios.get("/api/v1/passengers/"); // Replace with actual endpoint
+      setPassengers(response.data);
+    } catch (error) {
+      console.error("Error fetching passengers:", error);
+    }
+  };
+
+  const fetchSubscriptions = async () => {
+    try {
+      const response = await axios.get("/api/v1/subscriptions/");
+      setSubscriptions(response.data);
+    } catch (error) {
+      console.error("Error fetching subscriptions:", error);
+    }
+  };
 
   // Add new subscription
-  const handleAddSubscription = (subscriptionData: {
+  const handleAddSubscription = async (subscriptionData: {
     typeId: number;
     passengerId: number;
     startDate: string;
     endDate: string;
   }) => {
-    const type = subscriptionTypes.find(
-      (t) => t.id === Number(subscriptionData.typeId)
-    );
-    const passenger = passengers.find(
-      (p) => p.id === Number(subscriptionData.passengerId)
-    );
-
-    if (type && passenger) {
-      const newId = Math.max(...subscriptions.map((s) => s.id)) + 1;
-      const newSubscription = new Subscription(
-        newId,
-        type,
-        passenger,
-        subscriptionData.startDate,
-        subscriptionData.endDate
-      );
-      setSubscriptions([...subscriptions, newSubscription]);
+    try {
+      const response = await axios.post("/api/v1/subscriptions/", subscriptionData);
+      setSubscriptions([...subscriptions, response.data]);
       setShowAddPopup(false);
+    } catch (error) {
+      setError("Failed to add subscription. Please try again.");
+      console.error("Error adding subscription:", error);
     }
   };
 
@@ -154,22 +150,37 @@ const SubscriptionList = () => {
   };
 
   // Delete subscription
-  const handleDeleteSubscription = (id: number) => {
+  const handleDeleteSubscription = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this subscription?")) {
-      setSubscriptions(subscriptions.filter((sub) => sub.id !== id));
+      try {
+        await axios.delete(`/api/v1/subscriptions/${id}`);
+        setSubscriptions(subscriptions.filter((sub) => sub.id !== id));
+      } catch (error) {
+        setError("Failed to delete subscription. Please try again.");
+        console.error("Error deleting subscription:", error);
+      }
     }
   };
 
   // Save edited subscription
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (selectedSubscription) {
-      setSubscriptions(
-        subscriptions.map((sub) =>
-          sub.id === selectedSubscription.id ? selectedSubscription : sub
-        )
-      );
-      setShowEditPopup(false);
-      setSelectedSubscription(null);
+      try {
+        const response = await axios.put(
+          `/api/v1/subscriptions/${selectedSubscription.id}`,
+          selectedSubscription
+        );
+        setSubscriptions(
+          subscriptions.map((sub) =>
+            sub.id === selectedSubscription.id ? response.data : sub
+          )
+        );
+        setShowEditPopup(false);
+        setSelectedSubscription(null);
+      } catch (error) {
+        setError("Failed to update subscription. Please try again.");
+        console.error("Error updating subscription:", error);
+      }
     }
   };
 
@@ -215,6 +226,9 @@ const SubscriptionList = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
+
+      {/* Error Message */}
+      {error && <div className="mb-4 text-center text-red-500">{error}</div>}
 
       {/* Subscription List */}
       <ul className="mb-6 space-y-4">
@@ -438,7 +452,8 @@ const SubscriptionList = () => {
                       });
                     }
                   }}
-                >{subscriptionTypes.map((type) => (
+                >
+                  {subscriptionTypes.map((type) => (
                     <option key={type.id} value={type.id}>
                       {type.name} - ${type.price} ({type.duration} days)
                     </option>
