@@ -91,6 +91,8 @@ class Trip {
   }
 }
 
+const host = "http://localhost:8080";
+
 const TripList = () => {
   const [buses, setBuses] = useState<Bus[]>([]);
   const [busStops, setBusStops] = useState<BusStop[]>([]);
@@ -111,7 +113,7 @@ const TripList = () => {
 
   const fetchBuses = async () => {
     try {
-      const response = await axios.get("/api/v1/buses");
+      const response = await axios.get(`${host}/api/bus`);
       setBuses(response.data);
     } catch (error) {
       console.error("Error fetching buses:", error);
@@ -120,7 +122,7 @@ const TripList = () => {
 
   const fetchBusStops = async () => {
     try {
-      const response = await axios.get("/api/v1/busStops");
+      const response = await axios.get(`${host}/api/busStops/`);
       setBusStops(response.data);
     } catch (error) {
       console.error("Error fetching bus stops:", error);
@@ -129,7 +131,7 @@ const TripList = () => {
 
   const fetchRoutes = async () => {
     try {
-      const response = await axios.get("/api/v1/routes");
+      const response = await axios.get(`${host}/api/routes/`);
       setRoutes(response.data);
     } catch (error) {
       console.error("Error fetching routes:", error);
@@ -138,7 +140,7 @@ const TripList = () => {
 
   const fetchTrips = async () => {
     try {
-      const response = await axios.get("/api/v1/trips");
+      const response = await axios.get(`${host}/api/trips`);
       setTrips(response.data);
     } catch (error) {
       console.error("Error fetching trips:", error);
@@ -154,11 +156,54 @@ const TripList = () => {
     price: number;
   }) => {
     try {
-      const response = await axios.post("/api/v1/trips", tripData);
-      setTrips([...trips, response.data]);
+      const formattedData = {
+        bus: {
+          id: tripData.busId,
+        },
+        route: {
+          id: tripData.routeId,
+        },
+        departureTime: tripData.departureTime,
+        arrivalTime: tripData.arrivalTime,
+        price: tripData.price,
+        status: true, // Default status
+      };
+
+      const response = await axios.post(`${host}/api/trips`, formattedData);
+      fetchTrips();
       setShowAddPopup(false);
     } catch (error) {
       console.error("Error adding trip:", error);
+    }
+  };
+
+  // Save edited trip
+  const handleSaveEdit = async () => {
+    if (selectedTrip) {
+      try {
+        const formattedData = {
+          bus: {
+            id: selectedTrip.bus.id,
+          },
+          route: {
+            id: selectedTrip.route.id,
+          },
+          departureTime: selectedTrip.departureTime,
+          arrivalTime: selectedTrip.arrivalTime,
+          price: selectedTrip.price,
+          status: selectedTrip.status,
+        };
+
+        const response = await axios.put(
+          `${host}/api/trips/${selectedTrip.id}`,
+          formattedData,
+        );
+        fetchTrips();
+        setShowEditPopup(false);
+        setSelectedTrip(null);
+      } catch (error) {
+        console.error("Error updating trip:", error);
+      }
     }
   };
 
@@ -172,24 +217,10 @@ const TripList = () => {
   const handleDeleteTrip = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this trip?")) {
       try {
-        await axios.delete(`/api/v1/trips/${id}`);
-        setTrips(trips.filter((trip) => trip.id !== id));
+        await axios.delete(`${host}/api/trips/${id}`);
+        fetchTrips();
       } catch (error) {
         console.error("Error deleting trip:", error);
-      }
-    }
-  };
-
-  // Save edited trip
-  const handleSaveEdit = async () => {
-    if (selectedTrip) {
-      try {
-        const response = await axios.put(`/api/v1/trips/${selectedTrip.id}`, selectedTrip);
-        setTrips(trips.map((trip) => (trip.id === selectedTrip.id ? response.data : trip)));
-        setShowEditPopup(false);
-        setSelectedTrip(null);
-      } catch (error) {
-        console.error("Error updating trip:", error);
       }
     }
   };
@@ -276,7 +307,7 @@ const TripList = () => {
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
                   <FaMoneyBill className="text-green-600" />
-                  <span>${trip.price.toFixed(2)}</span>
+                  <span>{trip.price.toFixed(2)}{" "}MAD</span>
                 </div>
                 <div className="flex items-center gap-2">
                   {trip.status ? (
@@ -390,7 +421,7 @@ const TripList = () => {
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">
                   <FaMoneyBill className="mr-2 inline" />
-                  Price ($)
+                  Price (MAD)
                 </label>
                 <input
                   name="price"

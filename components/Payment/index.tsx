@@ -1,7 +1,8 @@
-'use client'
+"use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import {
   CreditCard,
   Mail,
@@ -13,6 +14,9 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@mui/material";
 
+const host = "http://localhost:8080"; // API host for tickets
+const paymentHost = "http://localhost:3400"; // API host for payments
+
 const PaymentComponent = () => {
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
@@ -22,40 +26,68 @@ const PaymentComponent = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [ticketId, setTicketId] = useState("ticket123"); // Example ticketId, replace with actual ticketId
+  const [reservedTrips, setReservedTrips] = useState<any[]>([]);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const router = useRouter();
 
+  // Fetch reserved trips from localStorage
+  useEffect(() => {
+    const savedTrips = JSON.parse(localStorage.getItem("savedTrips") || "[]");
+    setReservedTrips(savedTrips);
+
+    // Calculate total amount
+    const total = savedTrips.reduce((sum: number, trip: any) => sum + trip.price, 0);
+    setTotalAmount(total);
+  }, []);
+
+  // Handle payment submission
   const handlePayment = async () => {
     if (!email || !address || !cardNumber || !expiryDate || !cvc) {
       setError("Tous les champs sont obligatoires.");
       return;
     }
 
-    const paymentData = {
-      amount: 100,
-      userId: "user123",
-      ticketId, // Pass the ticketId here
-      date: new Date().toISOString(),
-      status: "completed",
-      cardInfo: { cardNumber, expiryDate, cvc },
-    };
-
     setLoading(true);
     setError("");
     setSuccess("");
 
     try {
-      const response = await axios.post("/api/v1/payment", paymentData);
-      if (response.status === 201) {
-        setSuccess("Paiement réussi!");
-        setEmail("");
-        setAddress("");
-        setCardNumber("");
-        setExpiryDate("");
-        setCvc("");
+      for (const trip of reservedTrips) {
+        // Step 1: Create a ticket for the trip
+        const ticketResponse = await axios.post(`${host}/api/ticket`, {
+          passengerId: 101, // Replace with actual passenger ID
+          trip: { id: trip.id },
+          seatNumber: trip.seatNumber || 15, // Use trip-specific seat number if available
+          status: true,
+        });
+
+        const ticketId = ticketResponse.data.id; // Get the created ticket ID
+
+        // Step 2: Create a payment for the ticket
+        const paymentData = {
+          amount: trip.price, // Use the trip's price
+          ticketId, // Include the ticket ID
+          date: new Date().toISOString(),
+          status: "completed",
+          cardInfo: { cardNumber, expiryDate, cvc },
+        };
+
+        const paymentResponse = await axios.post(
+          `${paymentHost}/api/v1/payment`,
+          paymentData,
+        );
+
+        if (paymentResponse.data.status !== "completed") {
+          throw new Error("Payment failed for trip ID: " + trip.id);
+        }
       }
+
+      setSuccess("Paiement réussi!");
+      localStorage.removeItem("savedTrips"); // Clear reserved trips after payment
+      setTimeout(() => router.push("/main"), 3000); // Redirect to home page after 3 seconds
     } catch (error) {
       setError("Échec du paiement. Veuillez réessayer.");
-      console.error("Error during payment:", error);
+      console.error("Error during payment or ticket creation:", error);
     } finally {
       setLoading(false);
     }
@@ -75,30 +107,44 @@ const PaymentComponent = () => {
       <CardContent className="space-y-6">
         <div className="rounded-lg bg-blue-50 p-4">
           <p className="text-lg font-medium">Montant à payer:</p>
-          <p className="text-3xl font-bold text-blue-600">100 MAD</p>
+          <p className="text-3xl font-bold text-blue-600">
+            {totalAmount.toFixed(2)} MAD
+          </p>
         </div>
 
-        <div className="space-y-2 rounded-lg bg-gray-50 p-4">
-          <h3 className="flex items-center gap-2 font-semibold">
-            <Calendar className="h-5 w-5 text-blue-500" />
-            Informations sur le billet
-          </h3>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <p>
-              <span className="font-medium">De:</span> Casablanca
-            </p>
-            <p>
-              <span className="font-medium">À:</span> Marrakech
-            </p>
-            <p>
-              <span className="font-medium">Date:</span> 2024-11-20
-            </p>
-            <p>
-              <span className="font-medium">Heure:</span> 08:00 AM
-            </p>
+        {/* Display reserved trips */}
+        {reservedTrips.map((trip) => (
+          <div key={trip.id} className="space-y-2 rounded-lg bg-gray-50 p-4">
+            <h3 className="flex items-center gap-2 font-semibold">
+              <Calendar className="h-5 w-5 text-blue-500" />
+              Informations sur le billet
+            </h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <p>
+                <span className="font-medium">De:</span>{" "}
+                {trip.route.source.name}
+              </p>
+              <p>
+                <span className="font-medium">À:</span>{" "}
+                {trip.route.destination.name}
+              </p>
+              <p>
+                <span className="font-medium">Date:</span>{" "}
+                {new Date(trip.departureTime).toLocaleDateString()}
+              </p>
+              <p>
+                <span className="font-medium">Heure:</span>{" "}
+                {new Date(trip.departureTime).toLocaleTimeString()}
+              </p>
+              <p>
+                <span className="font-medium">Prix:</span>{" "}
+                {trip.price.toFixed(2)} MAD
+              </p>
+            </div>
           </div>
-        </div>
+        ))}
 
+        {/* Payment form */}
         <div className="space-y-4">
           <div className="relative">
             <Mail className="absolute left-3 top-9 h-5 w-5 text-gray-400" />

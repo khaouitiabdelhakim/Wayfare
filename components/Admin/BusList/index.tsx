@@ -31,6 +31,8 @@ class Bus {
   }
 }
 
+const host = "http://localhost:8080";
+
 const BusList = () => {
   const [buses, setBuses] = useState<Bus[]>([]);
   const [showAddPopup, setShowAddPopup] = useState(false);
@@ -45,7 +47,7 @@ const BusList = () => {
 
   const fetchBuses = async () => {
     try {
-      const response = await axios.get("/api/v1/bus");
+      const response = await axios.get(`${host}/api/bus`);
       setBuses(response.data);
     } catch (error) {
       console.error("Error fetching buses:", error);
@@ -55,8 +57,8 @@ const BusList = () => {
   // Add new bus
   const handleAddBus = async (bus: Omit<Bus, "id">) => {
     try {
-      const response = await axios.post("/api/v1/bus", bus);
-      setBuses([...buses, response.data]);
+      const response = await axios.post(`${host}/api/bus`, bus);
+      fetchBuses();
       setShowAddPopup(false);
     } catch (error) {
       console.error("Error adding bus:", error);
@@ -73,7 +75,7 @@ const BusList = () => {
   const handleDeleteBus = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this bus?")) {
       try {
-        await axios.delete(`/api/v1/bus/${id}`);
+        await axios.delete(`${host}/api/bus/${id}`);
         setBuses(buses.filter((bus) => bus.id !== id));
       } catch (error) {
         console.error("Error deleting bus:", error);
@@ -85,8 +87,8 @@ const BusList = () => {
   const handleSaveEdit = async () => {
     if (selectedBus) {
       try {
-        const response = await axios.put(`/api/v1/bus/${selectedBus.id}`, selectedBus);
-        setBuses(buses.map((bus) => (bus.id === selectedBus.id ? response.data : bus)));
+        const response = await axios.put(`${host}/api/bus/${selectedBus.id}`, selectedBus);
+        fetchBuses();
         setShowEditPopup(false);
         setSelectedBus(null);
       } catch (error) {
@@ -135,9 +137,9 @@ const BusList = () => {
           >
             <div className="flex gap-4">
               <img
-                src={bus.imageUrl}
+                src={bus.imageUrl || "https://www.freeiconspng.com/thumbs/bus-png/bus-png-15.png"}
                 alt={`Bus ${bus.plateNumber}`}
-                className="h-24 w-32 rounded-md object-cover"
+                className="h-24  rounded-md"
               />
               <div className="flex flex-col justify-center">
                 <div className="flex items-center gap-2">

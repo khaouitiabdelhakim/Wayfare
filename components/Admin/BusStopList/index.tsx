@@ -23,6 +23,8 @@ class BusStop {
   }
 }
 
+const host = "http://localhost:8080"
+
 const BusStopList = () => {
   const [busStops, setBusStops] = useState<BusStop[]>([]);
   const [showAddPopup, setShowAddPopup] = useState(false);
@@ -37,7 +39,7 @@ const BusStopList = () => {
 
   const fetchBusStops = async () => {
     try {
-      const response = await axios.get("/api/v1/busStops/");
+      const response = await axios.get(`${host}/api/busStops/`);
       setBusStops(response.data);
     } catch (error) {
       console.error("Error fetching bus stops:", error);
@@ -47,7 +49,7 @@ const BusStopList = () => {
   // Add new bus stop
   const handleAddBusStop = async (busStop: Omit<BusStop, "id">) => {
     try {
-      const response = await axios.post("/api/v1/busStops/", busStop);
+      const response = await axios.post(`${host}/api/busStops/`, busStop);
       setBusStops([...busStops, response.data]);
       setShowAddPopup(false);
     } catch (error) {
@@ -65,7 +67,7 @@ const BusStopList = () => {
   const handleDeleteBusStop = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this bus stop?")) {
       try {
-        await axios.delete(`/api/v1/busStops/${id}`);
+        await axios.delete(`${host}/api/busStops/${id}`);
         setBusStops(busStops.filter((busStop) => busStop.id !== id));
       } catch (error) {
         console.error("Error deleting bus stop:", error);
@@ -77,7 +79,7 @@ const BusStopList = () => {
   const handleSaveEdit = async () => {
     if (selectedBusStop) {
       try {
-        const response = await axios.put(`/api/v1/busStops/${selectedBusStop.id}`, selectedBusStop);
+        const response = await axios.put(`${host}/api/busStops/${selectedBusStop.id}`, selectedBusStop);
         setBusStops(busStops.map((busStop) => 
           (busStop.id === selectedBusStop.id ? response.data : busStop)
         ));

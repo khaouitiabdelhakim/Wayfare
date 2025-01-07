@@ -1,18 +1,18 @@
-'use client'
+"use client";
 
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { 
-  FaEdit, 
-  FaTrash, 
-  FaPlus, 
-  FaMapMarkerAlt, 
-  FaRoute, 
+import {
+  FaEdit,
+  FaTrash,
+  FaPlus,
+  FaMapMarkerAlt,
+  FaRoute,
   FaArrowRight,
   FaClock,
   FaRuler,
   FaSearch,
-  FaMapMarked
+  FaMapMarked,
 } from "react-icons/fa";
 
 class BusStop {
@@ -34,7 +34,13 @@ class Route {
   distance: number;
   duration: number;
 
-  constructor(id: number, source: BusStop, destination: BusStop, distance: number, duration: number) {
+  constructor(
+    id: number,
+    source: BusStop,
+    destination: BusStop,
+    distance: number,
+    duration: number,
+  ) {
     this.id = id;
     this.source = source;
     this.destination = destination;
@@ -42,6 +48,8 @@ class Route {
     this.duration = duration;
   }
 }
+
+const host = "http://localhost:8080";
 
 const RouteList = () => {
   const [busStops, setBusStops] = useState<BusStop[]>([]);
@@ -59,7 +67,7 @@ const RouteList = () => {
 
   const fetchBusStops = async () => {
     try {
-      const response = await axios.get("/api/v1/busStops/");
+      const response = await axios.get(`${host}/api/busStops/`);
       setBusStops(response.data);
     } catch (error) {
       console.error("Error fetching bus stops:", error);
@@ -68,7 +76,7 @@ const RouteList = () => {
 
   const fetchRoutes = async () => {
     try {
-      const response = await axios.get("/api/v1/routes/");
+      const response = await axios.get(`${host}/api/routes/`);
       setRoutes(response.data);
     } catch (error) {
       console.error("Error fetching routes:", error);
@@ -77,14 +85,14 @@ const RouteList = () => {
 
   // Add new route
   const handleAddRoute = async (routeData: {
-    sourceId: number;
-    destinationId: number;
+    source: { id: number };
+    destination: { id: number };
     distance: number;
     duration: number;
   }) => {
     try {
-      const response = await axios.post("/api/v1/routes/", routeData);
-      setRoutes([...routes, response.data]);
+      const response = await axios.post(`${host}/api/routes/`, routeData);
+      fetchRoutes();
       setShowAddPopup(false);
     } catch (error) {
       console.error("Error adding route:", error);
@@ -101,7 +109,7 @@ const RouteList = () => {
   const handleDeleteRoute = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this route?")) {
       try {
-        await axios.delete(`/api/v1/routes/${id}`);
+        await axios.delete(`${host}/api/routes/${id}`);
         setRoutes(routes.filter((route) => route.id !== id));
       } catch (error) {
         console.error("Error deleting route:", error);
@@ -113,8 +121,11 @@ const RouteList = () => {
   const handleSaveEdit = async () => {
     if (selectedRoute) {
       try {
-        const response = await axios.put(`/api/v1/routes/${selectedRoute.id}`, selectedRoute);
-        setRoutes(routes.map((route) => (route.id === selectedRoute.id ? response.data : route)));
+        const response = await axios.put(
+          `${host}/api/routes/${selectedRoute.id}`,
+          selectedRoute,
+        );
+        fetchRoutes();
         setShowEditPopup(false);
         setSelectedRoute(null);
       } catch (error) {
@@ -124,9 +135,10 @@ const RouteList = () => {
   };
 
   // Filter routes based on search
-  const filteredRoutes = routes.filter(route => 
-    route.source.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    route.destination.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredRoutes = routes.filter(
+    (route) =>
+      route.source.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      route.destination.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -142,7 +154,7 @@ const RouteList = () => {
       </div>
 
       {/* Search Bar */}
-      <div className="mb-6 relative">
+      <div className="relative mb-6">
         <div className="absolute inset-y-0 left-0 flex items-center pl-3">
           <FaSearch className="text-gray-400" />
         </div>
@@ -217,20 +229,24 @@ const RouteList = () => {
       {showAddPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
-            <h3 className="mb-4 text-lg font-bold text-blue-800">Add New Route</h3>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.currentTarget);
-              handleAddRoute({
-                sourceId: Number(formData.get('sourceId')),
-                destinationId: Number(formData.get('destinationId')),
-                distance: Number(formData.get('distance')),
-                duration: Number(formData.get('duration'))
-              });
-            }}>
+            <h3 className="mb-4 text-lg font-bold text-blue-800">
+              Add New Route
+            </h3>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                handleAddRoute({
+                  source: { id: Number(formData.get("sourceId")) },
+                  destination: { id: Number(formData.get("destinationId")) },
+                  distance: Number(formData.get("distance")),
+                  duration: Number(formData.get("duration")),
+                });
+              }}
+            >
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">
-                  <FaMapMarkerAlt className="inline mr-2" />
+                  <FaMapMarkerAlt className="mr-2 inline" />
                   Source Stop
                 </label>
                 <select
@@ -239,14 +255,16 @@ const RouteList = () => {
                   className="w-full rounded-lg border p-2"
                 >
                   <option value="">Select source stop</option>
-                  {busStops.map(stop => (
-                    <option key={stop.id} value={stop.id}>{stop.name}</option>
+                  {busStops.map((stop) => (
+                    <option key={stop.id} value={stop.id}>
+                      {stop.name}
+                    </option>
                   ))}
                 </select>
               </div>
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">
-                  <FaMapMarkerAlt className="inline mr-2" />
+                  <FaMapMarkerAlt className="mr-2 inline" />
                   Destination Stop
                 </label>
                 <select
@@ -255,14 +273,16 @@ const RouteList = () => {
                   className="w-full rounded-lg border p-2"
                 >
                   <option value="">Select destination stop</option>
-                  {busStops.map(stop => (
-                    <option key={stop.id} value={stop.id}>{stop.name}</option>
+                  {busStops.map((stop) => (
+                    <option key={stop.id} value={stop.id}>
+                      {stop.name}
+                    </option>
                   ))}
                 </select>
               </div>
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">
-                  <FaRuler className="inline mr-2" />
+                  <FaRuler className="mr-2 inline" />
                   Distance (km)
                 </label>
                 <input
@@ -276,7 +296,7 @@ const RouteList = () => {
               </div>
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">
-                  <FaClock className="inline mr-2" />
+                  <FaClock className="mr-2 inline" />
                   Duration (minutes)
                 </label>
                 <input
@@ -315,53 +335,61 @@ const RouteList = () => {
             <form>
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">
-                  <FaMapMarkerAlt className="inline mr-2" />
+                  <FaMapMarkerAlt className="mr-2 inline" />
                   Source Stop
                 </label>
                 <select
                   className="w-full rounded-lg border p-2"
                   value={selectedRoute.source.id}
                   onChange={(e) => {
-                    const stop = busStops.find(s => s.id === Number(e.target.value));
+                    const stop = busStops.find(
+                      (s) => s.id === Number(e.target.value),
+                    );
                     if (stop) {
                       setSelectedRoute({
                         ...selectedRoute,
-                        source: stop
+                        source: stop,
                       });
                     }
                   }}
                 >
-                  {busStops.map(stop => (
-                    <option key={stop.id} value={stop.id}>{stop.name}</option>
+                  {busStops.map((stop) => (
+                    <option key={stop.id} value={stop.id}>
+                      {stop.name}
+                    </option>
                   ))}
                 </select>
               </div>
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">
-                  <FaMapMarkerAlt className="inline mr-2" />
+                  <FaMapMarkerAlt className="mr-2 inline" />
                   Destination Stop
                 </label>
                 <select
                   className="w-full rounded-lg border p-2"
                   value={selectedRoute.destination.id}
                   onChange={(e) => {
-                    const stop = busStops.find(s => s.id === Number(e.target.value));
+                    const stop = busStops.find(
+                      (s) => s.id === Number(e.target.value),
+                    );
                     if (stop) {
                       setSelectedRoute({
                         ...selectedRoute,
-                        destination: stop
+                        destination: stop,
                       });
                     }
                   }}
                 >
-                  {busStops.map(stop => (
-                    <option key={stop.id} value={stop.id}>{stop.name}</option>
+                  {busStops.map((stop) => (
+                    <option key={stop.id} value={stop.id}>
+                      {stop.name}
+                    </option>
                   ))}
                 </select>
               </div>
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">
-                  <FaRuler className="inline mr-2" />
+                  <FaRuler className="mr-2 inline" />
                   Distance (km)
                 </label>
                 <input
@@ -372,14 +400,14 @@ const RouteList = () => {
                   onChange={(e) =>
                     setSelectedRoute({
                       ...selectedRoute,
-                      distance: Number(e.target.value)
+                      distance: Number(e.target.value),
                     })
                   }
                 />
               </div>
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">
-                  <FaClock className="inline mr-2" />
+                  <FaClock className="mr-2 inline" />
                   Duration (minutes)
                 </label>
                 <input
@@ -389,7 +417,7 @@ const RouteList = () => {
                   onChange={(e) =>
                     setSelectedRoute({
                       ...selectedRoute,
-                      duration: Number(e.target.value)
+                      duration: Number(e.target.value),
                     })
                   }
                 />

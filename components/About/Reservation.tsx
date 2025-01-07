@@ -2,7 +2,24 @@
 
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { FaBus, FaCalendarAlt, FaUsers, FaSearch, FaTicketAlt } from "react-icons/fa";
+import { FaUsers, FaTicketAlt } from "react-icons/fa";
+import {
+  FaEdit,
+  FaTrash,
+  FaPlus,
+  FaBus,
+  FaRoute,
+  FaClock,
+  FaMoneyBill,
+  FaSearch,
+  FaCalendarAlt,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaArrowRight,
+} from "react-icons/fa";
+import { useRouter } from "next/navigation";
+
+const host = "http://localhost:8080";
 
 const Reservation = () => {
   const [busStops, setBusStops] = useState<{ id: number; name: string }[]>([]);
@@ -13,12 +30,14 @@ const Reservation = () => {
   const [trips, setTrips] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [reservedTrips, setReservedTrips] = useState<number[]>([]); // Track reserved trips by ID
+  const router = useRouter();
 
   // Fetch all bus stops
   useEffect(() => {
     const fetchBusStops = async () => {
       try {
-        const response = await axios.get("/api/v1/busStops/");
+        const response = await axios.get(`${host}/api/busStops/`);
         setBusStops(response.data);
       } catch (err) {
         setError("Failed to fetch bus stops. Please try again.");
@@ -40,11 +59,11 @@ const Reservation = () => {
     setError(null);
 
     try {
-      const response = await axios.get("/api/v1/trips/search", {
+      const response = await axios.get(`${host}/api/trips/search`, {
         params: {
           sourceId: source,
           destinationId: destination,
-          date,
+          departureTime: date,
         },
       });
       setTrips(response.data);
@@ -54,6 +73,28 @@ const Reservation = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Toggle reservation status
+  const toggleReservation = (tripId: number) => {
+    if (reservedTrips.includes(tripId)) {
+      setReservedTrips(reservedTrips.filter((id) => id !== tripId));
+    } else {
+      setReservedTrips([...reservedTrips, tripId]);
+    }
+  };
+
+  // Redirect to payment page
+  const handlePayment = (tripId: number) => {
+    router.push(`/global/payment?tripId=${tripId}`);
+  };
+
+  // Format datetime for display
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleString("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
   };
 
   return (
@@ -148,7 +189,9 @@ const Reservation = () => {
 
               {/* Trip Results */}
               {loading && (
-                <div className="mb-8 text-center text-gray-600">Chargement...</div>
+                <div className="mb-8 text-center text-gray-600">
+                  Chargement...
+                </div>
               )}
               {error && (
                 <div className="mb-8 rounded-lg bg-red-50 p-4 text-red-500">
@@ -157,34 +200,92 @@ const Reservation = () => {
               )}
               {trips.length > 0 && (
                 <div className="space-y-4">
-                  {trips.map((trip) => (
-                    <div
-                      key={trip.id}
-                      className="rounded-lg bg-white p-6 shadow-lg"
-                    >
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                          <h3 className="text-xl font-bold text-gray-800">
-                            {trip.source.name} → {trip.destination.name}
-                          </h3>
-                          <p className="text-sm text-gray-600">
-                            Départ: {new Date(trip.departureTime).toLocaleString()}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            Arrivée: {new Date(trip.arrivalTime).toLocaleString()}
-                          </p>
+                  {/* Trip List */}
+                  <ul className="mb-6 space-y-4">
+                    {trips.map((trip) => (
+                      <li
+                        key={trip.id}
+                        className="flex items-center justify-between rounded-lg border border-purple-200 bg-white p-4 shadow"
+                      >
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                              <FaBus className="text-purple-600" />
+                              <p className="font-semibold">
+                                {trip.bus.plateNumber}
+                              </p>
+                              <span className="text-sm text-gray-500">
+                                (Capacity: {trip.bus.capacity})
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                              <FaRoute className="text-purple-600" />
+                              <span>{trip.route.source.name}</span>
+                              <FaArrowRight className="text-gray-400" />
+                              <span>{trip.route.destination.name}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                            <div className="flex items-center gap-2">
+                              <FaCalendarAlt />
+                              <span>
+                                Departure: {formatDateTime(trip.departureTime)}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <FaCalendarAlt />
+                              <span>
+                                Arrival: {formatDateTime(trip.arrivalTime)}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                              <FaMoneyBill className="text-green-600" />
+                              <span>{trip.price.toFixed(2)} MAD</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {trip.status ? (
+                                <FaCheckCircle className="text-green-600" />
+                              ) : (
+                                <FaTimesCircle className="text-red-600" />
+                              )}
+                              <span className="text-sm">
+                                {trip.status ? "Active" : "Cancelled"}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                          <p className="text-lg font-bold text-gray-800">
-                            ${trip.price.toFixed(2)}
-                          </p>
-                          <button className="flex items-center rounded-lg bg-gradient-to-r from-green-500 to-green-700 px-6 py-2 font-bold text-white shadow-lg transition-all duration-300 hover:from-green-600 hover:to-green-800">
-                            <FaTicketAlt className="mr-2" /> Réserver
-                          </button>
+                        <div className="flex gap-2">
+                          {reservedTrips.includes(trip.id) ? (
+                            <>
+                              <button
+                                className="flex items-center rounded-lg bg-gradient-to-r from-red-500 to-red-700 px-6 py-2 font-bold text-white shadow-lg transition-all duration-300 hover:from-red-600 hover:to-red-800"
+                                onClick={() => toggleReservation(trip.id)}
+                              >
+                                <FaTimesCircle className="mr-2" /> Annuler
+                              </button>
+                              <button
+                                className="flex items-center rounded-lg bg-gradient-to-r from-blue-500 to-blue-700 px-6 py-2 font-bold text-white shadow-lg transition-all duration-300 hover:from-blue-600 hover:to-blue-800"
+                                onClick={() => handlePayment(trip.id)}
+                              >
+                                <FaMoneyBill className="mr-2" /> Payer
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              className="flex items-center rounded-lg bg-gradient-to-r from-green-500 to-green-700 px-6 py-2 font-bold text-white shadow-lg transition-all duration-300 hover:from-green-600 hover:to-green-800"
+                              onClick={() => toggleReservation(trip.id)}
+                            >
+                              <FaTicketAlt className="mr-2" /> Réserver
+                            </button>
+                          )}
                         </div>
-                      </div>
-                    </div>
-                  ))}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
             </div>
