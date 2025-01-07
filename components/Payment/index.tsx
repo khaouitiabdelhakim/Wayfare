@@ -32,12 +32,12 @@ const PaymentComponent = () => {
 
   // Fetch reserved trips from localStorage
   useEffect(() => {
-    const fetchReservedTrips = async () => {
+    const fetchReservedTrips = () => {
       const savedTrips = JSON.parse(localStorage.getItem("reservedTrips") || "[]");
       if (!savedTrips.length) return;
 
       try {
-       
+        // Set the reserved trips directly from localStorage
         setReservedTrips(savedTrips);
 
         // Calculate total amount
