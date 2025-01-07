@@ -3,11 +3,11 @@
 
 import dynamic from 'next/dynamic';
 import { useSearchParams } from 'next/navigation'; // Import useSearchParams
-import React from 'react';
+import React, { Suspense } from 'react';
 
 const DynamicBusTracking = dynamic(() => import('@/components/BusTracking'), { ssr: false });
 
-const BusTrackingPage = () => {
+const BusTrackingPageContent = () => {
   const searchParams = useSearchParams(); // Access query parameters
   const busId = searchParams.get('busId'); // Get the busId from the query
 
@@ -20,6 +20,14 @@ const BusTrackingPage = () => {
       <h1>Bus Tracking</h1>
       <DynamicBusTracking busId={busId} /> {/* Pass busId as a prop */}
     </div>
+  );
+};
+
+const BusTrackingPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <BusTrackingPageContent />
+    </Suspense>
   );
 };
 
