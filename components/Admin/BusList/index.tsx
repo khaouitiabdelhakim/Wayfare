@@ -1,18 +1,18 @@
-'use client'
+"use client";
 
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { 
-  FaEdit, 
-  FaTrash, 
-  FaPlus, 
-  FaBus, 
-  FaHashtag, 
-  FaUsers, 
-  FaImage, 
+import {
+  FaEdit,
+  FaTrash,
+  FaPlus,
+  FaBus,
+  FaHashtag,
+  FaUsers,
+  FaImage,
   FaSearch,
   FaCheckCircle,
-  FaTimesCircle
+  FaTimesCircle,
 } from "react-icons/fa";
 
 class Bus {
@@ -22,7 +22,13 @@ class Bus {
   imageUrl: string;
   status: boolean;
 
-  constructor(id: number, plateNumber: string, capacity: number, imageUrl: string, status: boolean = true) {
+  constructor(
+    id: number,
+    plateNumber: string,
+    capacity: number,
+    imageUrl: string,
+    status: boolean = true,
+  ) {
     this.id = id;
     this.plateNumber = plateNumber;
     this.capacity = capacity;
@@ -87,7 +93,10 @@ const BusList = () => {
   const handleSaveEdit = async () => {
     if (selectedBus) {
       try {
-        const response = await axios.put(`${host}/api/bus/${selectedBus.id}`, selectedBus);
+        const response = await axios.put(
+          `${host}/api/bus/${selectedBus.id}`,
+          selectedBus,
+        );
         fetchBuses();
         setShowEditPopup(false);
         setSelectedBus(null);
@@ -98,8 +107,8 @@ const BusList = () => {
   };
 
   // Filter buses based on search
-  const filteredBuses = buses.filter(bus => 
-    bus.plateNumber.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredBuses = buses.filter((bus) =>
+    bus.plateNumber.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -115,7 +124,7 @@ const BusList = () => {
       </div>
 
       {/* Search Bar */}
-      <div className="mb-6 relative">
+      <div className="relative mb-6">
         <div className="absolute inset-y-0 left-0 flex items-center pl-3">
           <FaSearch className="text-gray-400" />
         </div>
@@ -137,7 +146,10 @@ const BusList = () => {
           >
             <div className="flex gap-4">
               <img
-                src={bus.imageUrl || "https://www.freeiconspng.com/thumbs/bus-png/bus-png-15.png"}
+                src={
+                  bus.imageUrl ||
+                  "https://www.freeiconspng.com/thumbs/bus-png/bus-png-15.png"
+                }
                 alt={`Bus ${bus.plateNumber}`}
                 className="h-24  rounded-md"
               />
@@ -148,13 +160,16 @@ const BusList = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <FaUsers className="text-gray-600" />
-                  <p className="text-sm text-gray-600">Capacity: {bus.capacity} seats</p>
+                  <p className="text-sm text-gray-600">
+                    Capacity: {bus.capacity} seats
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {bus.status ? 
-                    <FaCheckCircle className="text-green-600" /> :
+                  {bus.status ? (
+                    <FaCheckCircle className="text-green-600" />
+                  ) : (
                     <FaTimesCircle className="text-red-600" />
-                  }
+                  )}
                   <p className="text-sm text-gray-600">
                     Status: {bus.status ? "Active" : "Inactive"}
                   </p>
@@ -183,20 +198,24 @@ const BusList = () => {
       {showAddPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
-            <h3 className="mb-4 text-lg font-bold text-orange-800">Add New Bus</h3>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.currentTarget);
-              handleAddBus({
-                plateNumber: formData.get('plateNumber') as string,
-                capacity: Number(formData.get('capacity')),
-                imageUrl: formData.get('imageUrl') as string,
-                status: true
-              });
-            }}>
+            <h3 className="mb-4 text-lg font-bold text-orange-800">
+              Add New Bus
+            </h3>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                handleAddBus({
+                  plateNumber: formData.get("plateNumber") as string,
+                  capacity: Number(formData.get("capacity")),
+                  imageUrl: formData.get("imageUrl") as string,
+                  status: true,
+                });
+              }}
+            >
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">
-                  <FaHashtag className="inline mr-2" />
+                  <FaHashtag className="mr-2 inline" />
                   Plate Number
                 </label>
                 <input
@@ -208,7 +227,7 @@ const BusList = () => {
               </div>
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">
-                  <FaUsers className="inline mr-2" />
+                  <FaUsers className="mr-2 inline" />
                   Capacity
                 </label>
                 <input
@@ -221,7 +240,7 @@ const BusList = () => {
               </div>
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">
-                  <FaImage className="inline mr-2" />
+                  <FaImage className="mr-2 inline" />
                   Image URL
                 </label>
                 <input
@@ -259,7 +278,7 @@ const BusList = () => {
             <form>
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">
-                  <FaHashtag className="inline mr-2" />
+                  <FaHashtag className="mr-2 inline" />
                   Plate Number
                 </label>
                 <input
@@ -276,7 +295,7 @@ const BusList = () => {
               </div>
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">
-                  <FaUsers className="inline mr-2" />
+                  <FaUsers className="mr-2 inline" />
                   Capacity
                 </label>
                 <input
@@ -293,7 +312,7 @@ const BusList = () => {
               </div>
               <div className="mb-4">
                 <label className="mb-1 block text-sm font-medium">
-                  <FaImage className="inline mr-2" />
+                  <FaImage className="mr-2 inline" />
                   Image URL
                 </label>
                 <input
