@@ -30,7 +30,7 @@ const Reservation = () => {
   const [trips, setTrips] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [reservedTrips, setReservedTrips] = useState<number[]>([]); // Track reserved trips by ID
+  const [reservedTrips, setReservedTrips] = useState<any[]>([]); // Track reserved trips by full objects
   const router = useRouter();
 
   // Fetch all bus stops
@@ -57,6 +57,7 @@ const Reservation = () => {
   // Save reserved trips to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem("reservedTrips", JSON.stringify(reservedTrips));
+    console.log("Reserved trips updated:", reservedTrips);
   }, [reservedTrips]);
 
   // Search for trips
@@ -87,17 +88,17 @@ const Reservation = () => {
   };
 
   // Toggle reservation status
-  const toggleReservation = (tripId: number) => {
-    if (reservedTrips.includes(tripId)) {
-      setReservedTrips(reservedTrips.filter((id) => id !== tripId));
+  const toggleReservation = (trip: any) => {
+    if (reservedTrips.some((t) => t.id === trip.id)) {
+      setReservedTrips(reservedTrips.filter((t) => t.id !== trip.id));
     } else {
-      setReservedTrips([...reservedTrips, tripId]);
+      setReservedTrips([...reservedTrips, trip]);
     }
   };
 
-  // Redirect to payment page with reserved trip IDs
+  // Redirect to payment page
   const handlePayment = () => {
-    router.push(`/global/payment?tripIds=${reservedTrips.join(",")}`);
+    router.push("/global/payment");
   };
 
   // Format datetime for display
@@ -270,11 +271,11 @@ const Reservation = () => {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          {reservedTrips.includes(trip.id) ? (
+                          {reservedTrips.some((t) => t.id === trip.id) ? (
                             <>
                               <button
                                 className="flex items-center rounded-lg bg-gradient-to-r from-red-500 to-red-700 px-6 py-2 font-bold text-white shadow-lg transition-all duration-300 hover:from-red-600 hover:to-red-800"
-                                onClick={() => toggleReservation(trip.id)}
+                                onClick={() => toggleReservation(trip)}
                               >
                                 <FaTimesCircle className="mr-2" /> Annuler
                               </button>
@@ -288,7 +289,7 @@ const Reservation = () => {
                           ) : (
                             <button
                               className="flex items-center rounded-lg bg-gradient-to-r from-green-500 to-green-700 px-6 py-2 font-bold text-white shadow-lg transition-all duration-300 hover:from-green-600 hover:to-green-800"
-                              onClick={() => toggleReservation(trip.id)}
+                              onClick={() => toggleReservation(trip)}
                             >
                               <FaTicketAlt className="mr-2" /> Réserver
                             </button>

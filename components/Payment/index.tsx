@@ -32,24 +32,13 @@ const PaymentComponent = () => {
 
   // Fetch reserved trips from localStorage
   useEffect(() => {
-    const fetchReservedTrips = () => {
-      const savedTrips = JSON.parse(localStorage.getItem("reservedTrips") || "[]");
-      if (!savedTrips.length) return;
+    const savedTrips = JSON.parse(localStorage.getItem("reservedTrips") || "[]");
+    console.log("Saved trips:", savedTrips);
+    setReservedTrips(savedTrips);
 
-      try {
-        // Set the reserved trips directly from localStorage
-        setReservedTrips(savedTrips);
-
-        // Calculate total amount
-        const total = savedTrips.reduce((sum: number, trip: any) => sum + trip.price, 0);
-        setTotalAmount(total);
-      } catch (err) {
-        setError("Failed to fetch reserved trips. Please try again.");
-        console.error("Error fetching reserved trips:", err);
-      }
-    };
-
-    fetchReservedTrips();
+    // Calculate total amount
+    const total = savedTrips.reduce((sum: number, trip: any) => sum + trip.price, 0);
+    setTotalAmount(total);
   }, []);
 
   // Handle payment submission
