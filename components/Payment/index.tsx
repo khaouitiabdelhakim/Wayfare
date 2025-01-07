@@ -30,15 +30,16 @@ const PaymentComponent = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const router = useRouter();
 
-  // Fetch reserved trips from query parameters
+  // Fetch reserved trips from localStorage
   useEffect(() => {
     const fetchReservedTrips = async () => {
-      const tripIds = new URLSearchParams(window.location.search).get("tripIds");
-      if (!tripIds) return;
+      const savedTrips = JSON.parse(localStorage.getItem("reservedTrips") || "[]");
+      if (!savedTrips.length) return;
 
       try {
+        // Fetch trip details for the reserved trip IDs
         const response = await axios.get(`${host}/api/trips`, {
-          params: { ids: tripIds },
+          params: { ids: savedTrips.join(",") },
         });
         setReservedTrips(response.data);
 
@@ -97,6 +98,7 @@ const PaymentComponent = () => {
       }
 
       setSuccess("Paiement réussi!");
+      localStorage.removeItem("reservedTrips"); // Clear reserved trips after payment
       setTimeout(() => router.push("/main"), 3000); // Redirect to home page after 3 seconds
     } catch (error) {
       setError("Échec du paiement. Veuillez réessayer.");
