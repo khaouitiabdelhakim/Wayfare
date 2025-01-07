@@ -37,14 +37,11 @@ const PaymentComponent = () => {
       if (!savedTrips.length) return;
 
       try {
-        // Fetch trip details for the reserved trip IDs
-        const response = await axios.get(`${host}/api/trips`, {
-          params: { ids: savedTrips.join(",") },
-        });
-        setReservedTrips(response.data);
+       
+        setReservedTrips(savedTrips);
 
         // Calculate total amount
-        const total = response.data.reduce((sum: number, trip: any) => sum + trip.price, 0);
+        const total = savedTrips.data.reduce((sum: number, trip: any) => sum + trip.price, 0);
         setTotalAmount(total);
       } catch (err) {
         setError("Failed to fetch reserved trips. Please try again.");
