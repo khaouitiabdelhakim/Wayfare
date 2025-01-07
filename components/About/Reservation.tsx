@@ -48,6 +48,17 @@ const Reservation = () => {
     fetchBusStops();
   }, []);
 
+  // Load reserved trips from localStorage on component mount
+  useEffect(() => {
+    const savedReservedTrips = JSON.parse(localStorage.getItem("reservedTrips") || "[]");
+    setReservedTrips(savedReservedTrips);
+  }, []);
+
+  // Save reserved trips to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem("reservedTrips", JSON.stringify(reservedTrips));
+  }, [reservedTrips]);
+
   // Search for trips
   const handleSearch = async () => {
     if (!source || !destination || !date) {
@@ -84,9 +95,9 @@ const Reservation = () => {
     }
   };
 
-  // Redirect to payment page
-  const handlePayment = (tripId: number) => {
-    router.push(`/global/payment?tripId=${tripId}`);
+  // Redirect to payment page with reserved trip IDs
+  const handlePayment = () => {
+    router.push(`/global/payment?tripIds=${reservedTrips.join(",")}`);
   };
 
   // Format datetime for display
@@ -269,7 +280,7 @@ const Reservation = () => {
                               </button>
                               <button
                                 className="flex items-center rounded-lg bg-gradient-to-r from-blue-500 to-blue-700 px-6 py-2 font-bold text-white shadow-lg transition-all duration-300 hover:from-blue-600 hover:to-blue-800"
-                                onClick={() => handlePayment(trip.id)}
+                                onClick={handlePayment}
                               >
                                 <FaMoneyBill className="mr-2" /> Payer
                               </button>

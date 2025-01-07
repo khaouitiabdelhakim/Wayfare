@@ -30,14 +30,28 @@ const PaymentComponent = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const router = useRouter();
 
-  // Fetch reserved trips from localStorage
+  // Fetch reserved trips from query parameters
   useEffect(() => {
-    const savedTrips = JSON.parse(localStorage.getItem("savedTrips") || "[]");
-    setReservedTrips(savedTrips);
+    const fetchReservedTrips = async () => {
+      const tripIds = new URLSearchParams(window.location.search).get("tripIds");
+      if (!tripIds) return;
 
-    // Calculate total amount
-    const total = savedTrips.reduce((sum: number, trip: any) => sum + trip.price, 0);
-    setTotalAmount(total);
+      try {
+        const response = await axios.get(`${host}/api/trips`, {
+          params: { ids: tripIds },
+        });
+        setReservedTrips(response.data);
+
+        // Calculate total amount
+        const total = response.data.reduce((sum: number, trip: any) => sum + trip.price, 0);
+        setTotalAmount(total);
+      } catch (err) {
+        setError("Failed to fetch reserved trips. Please try again.");
+        console.error("Error fetching reserved trips:", err);
+      }
+    };
+
+    fetchReservedTrips();
   }, []);
 
   // Handle payment submission
@@ -83,7 +97,6 @@ const PaymentComponent = () => {
       }
 
       setSuccess("Paiement réussi!");
-      localStorage.removeItem("savedTrips"); // Clear reserved trips after payment
       setTimeout(() => router.push("/main"), 3000); // Redirect to home page after 3 seconds
     } catch (error) {
       setError("Échec du paiement. Veuillez réessayer.");
